@@ -5,9 +5,6 @@ import (
 	"intjob/repository"
 	"log"
 	"os"
-
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
 )
 
 // App struct
@@ -26,22 +23,84 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-// Greet returns a greeting for the given name
-func (a *App) GetAgentById(id uint) repository.Agent {
-	path, err := os.Getwd()
-	log.Println(path)
+func (a *App) GetAgentById(id uint) repository.Response {
+	return repository.GetAgentById(id)
+}
 
-	db, err := gorm.Open(sqlite.Open("intjob.db"), &gorm.Config{})
-	if err != nil {
-		panic("failed to connect database")
-	}
+func (a *App) SaveAgent(agent repository.Agent) repository.Response {
+	return repository.SaveAgent(agent)
+}
 
-	agent := repository.Agent{}
-	db.First(&agent, id)
-	// repo := repository.NewRepository()
+func (a *App) ListAllAgents() repository.Response {
+	return repository.ListAllAgents()
+}
 
-	// agent, _ := repo.GetAgentById(id)
-	return agent
+func (a *App) DeleteAgent(agent repository.Agent) repository.Response {
+	return repository.DeleteAgent(agent)
+}
+
+func (a *App) GetIndustryById(id uint) repository.Response {
+	return repository.GetIndustryById(id)
+}
+
+func (a *App) SaveIndustry(industry repository.Industry) repository.Response {
+	return repository.SaveIndustry(industry)
+}
+
+func (a *App) ListAllIndustries() repository.Response {
+	return repository.ListAllIndustries()
+}
+
+func (a *App) DeleteIndustry(industry repository.Industry) repository.Response {
+	return repository.DeleteIndustry(industry)
+}
+
+func (a *App) GetRateById(id uint) repository.Response {
+	return repository.GetRateById(id)
+}
+
+func (a *App) SaveRate(rate repository.Rate) repository.Response {
+	return repository.SaveRate(rate)
+}
+
+func (a *App) ListAllRates() repository.Response {
+	return repository.ListAllRates()
+}
+
+func (a *App) DeleteRate(rate repository.Rate) repository.Response {
+	return repository.DeleteRate(rate)
+}
+
+func (a *App) GetHolidayById(id uint) repository.Response {
+	return repository.GetHolidayById(id)
+}
+
+func (a *App) SaveHoliday(holiday repository.Holiday) repository.Response {
+	return repository.SaveHoliday(holiday)
+}
+
+func (a *App) ListAllHolidays() repository.Response {
+	return repository.ListAllHolidays()
+}
+
+func (a *App) DeleteHoliday(holiday repository.Holiday) repository.Response {
+	return repository.DeleteHoliday(holiday)
+}
+
+func (a *App) GetJobById(id uint) repository.Response {
+	return repository.GetJobById(id)
+}
+
+func (a *App) SaveJob(job repository.Job) repository.Response {
+	return repository.SaveJob(job)
+}
+
+func (a *App) ListAllJobs() repository.Response {
+	return repository.ListAllJobs()
+}
+
+func (a *App) DeleteJob(job repository.Job) repository.Response {
+	return repository.DeleteJob(job)
 }
 
 func (a *App) GetCurrentDir() string {

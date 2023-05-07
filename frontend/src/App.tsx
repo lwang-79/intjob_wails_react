@@ -1,30 +1,24 @@
-import {useState} from 'react';
-import {GetAgentById, GetCurrentDir} from "../wailsjs/go/main/App";
-import { Button } from '@chakra-ui/react';
+import { Box, Button, ChakraProvider, VStack } from "@chakra-ui/react"
+import Header from "./components/Common/Header"
+import JobByDateChart from "./components/Dashboard/JobByDateChart"
+import Footer from "./components/Common/Footer"
+import Dashboard from "./components/Dashboard/Dashboard"
+import theme from "./types/theme"
 
 function App() {
-  const [resultText, setResultText] = useState("Please enter your name below 👇");
-  const [name, setName] = useState('');
-  const updateName = (e: any) => setName(e.target.value);
-  const updateResultText = (result: string) => setResultText(result);
-
-  function greet() {
-    GetAgentById(1).then(agent => {
-        console.log(agent)
-        
-        updateResultText(agent.Name)
-    });
-    // GetCurrentDir().then(updateResultText)
-  }
 
   return (
-    <>
+    <ChakraProvider theme={theme}>
+      <Header/>
+
+      <VStack minH='80vh' pt={20}>
       <Button
-          colorScheme="blue"
-          variant="ghost"
-          onClick={greet}
-      >{resultText}</Button>
-    </>
+      >test</Button>
+      <Dashboard />
+
+      </VStack>
+      <Footer />
+    </ChakraProvider>
   )
 }
 
