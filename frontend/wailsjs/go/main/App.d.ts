@@ -26,13 +26,13 @@ export function GetRateById(arg1:number):Promise<repository.Response>;
 
 export function ListAllAgents():Promise<repository.Response>;
 
-export function ListAllHolidays():Promise<repository.Response>;
-
 export function ListAllIndustries():Promise<repository.Response>;
 
-export function ListAllJobs():Promise<repository.Response>;
-
 export function ListAllRates():Promise<repository.Response>;
+
+export function ListHolidays(arg1:string):Promise<repository.Response>;
+
+export function ListJobs(arg1:string,arg2:number):Promise<repository.Response>;
 
 export function SaveAgent(arg1:repository.Agent):Promise<repository.Response>;
 

@@ -50,20 +50,20 @@ export function ListAllAgents() {
   return window['go']['main']['App']['ListAllAgents']();
 }
 
-export function ListAllHolidays() {
-  return window['go']['main']['App']['ListAllHolidays']();
-}
-
 export function ListAllIndustries() {
   return window['go']['main']['App']['ListAllIndustries']();
 }
 
-export function ListAllJobs() {
-  return window['go']['main']['App']['ListAllJobs']();
-}
-
 export function ListAllRates() {
   return window['go']['main']['App']['ListAllRates']();
+}
+
+export function ListHolidays(arg1) {
+  return window['go']['main']['App']['ListHolidays'](arg1);
+}
+
+export function ListJobs(arg1, arg2) {
+  return window['go']['main']['App']['ListJobs'](arg1, arg2);
 }
 
 export function SaveAgent(arg1) {

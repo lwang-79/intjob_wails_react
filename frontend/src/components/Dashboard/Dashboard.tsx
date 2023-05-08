@@ -1,18 +1,39 @@
-import { HStack, VStack, useColorMode } from '@chakra-ui/react';
+import { HStack, Spacer, VStack, useColorMode } from '@chakra-ui/react';
 import Highcharts from "highcharts/highstock";
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import JobByDateChart from './JobByDateChart';
+import { Job, Response } from '../../types/models';
+import { ListJobs } from '../../../wailsjs/go/main/App';
+import AgentAndIndustryChart from './AgentAndIndustryChart';
+import IncomeLineChart from './IncomeLineChart';
+import JobStatusCard from './JobStatusCard';
+import HolidayCard from './HolidayCard';
 
 function Dashboard() {
   const { colorMode } = useColorMode();
+  const [ jobs, setJobs ] = useState<Job[]>();
+
+  useEffect(() => {
+    getAndSetAllJobs();
+  },[]);
+
+  const getAndSetAllJobs = async () => {
+    const response: Response = await ListJobs('', 1000);
+    if (response.Status !== 'success') {
+      console.error(response.Status);
+      return;
+    }
+
+    const jobs = response.Result as Job[];
+
+    setJobs(jobs);
+  }
 
   // set highcharts color mode
   useMemo(() => {
-    console.log(colorMode);
-
     Highcharts.theme = colorMode == 'dark' ? {
       colors: [
-        '#4FD1C5', '#4299E1', '#ED64A6', '#ED8936', 
+        '#4299E1', '#ED8936', '#4FD1C5', '#ED64A6', 
         '#48BB78', '#9F7AEA', '#ECC94B', '#F56565',
         '#0BC5EA', '#A0AEC0'
       ],
@@ -33,7 +54,7 @@ function Dashboard() {
       }
     } : {
       colors: [
-        '#4FD1C5', '#4299E1', '#ED64A6', '#ED8936', 
+        '#4299E1', '#ED8936', '#4FD1C5', '#ED64A6',
         '#48BB78', '#9F7AEA', '#ECC94B', '#F56565',
         '#0BC5EA', '#A0AEC0'
       ],
@@ -59,15 +80,18 @@ function Dashboard() {
 
   return (
     <>
-      <HStack>
-        <VStack>
-          <JobByDateChart />
-
+      {jobs && 
+      <HStack w='full' maxW='5xl' px={4} align='flex-start'>
+        <VStack maxW='3xl' w='full' >
+          <JobByDateChart jobs={jobs}/>
+          <AgentAndIndustryChart jobs={jobs}/>
         </VStack>
-        <VStack>
-
+        <VStack maxW='xs' w='full' >
+          <IncomeLineChart jobs={jobs}/>
+          <JobStatusCard jobs={jobs}/>
+          <HolidayCard />
         </VStack>
-      </HStack>
+      </HStack>}
       
     </>
   )

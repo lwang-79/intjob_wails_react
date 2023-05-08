@@ -1,11 +1,8 @@
-import { ReactNode, useContext, useEffect, useState } from 'react';
 import {
   Box,
   Flex,
   Avatar,
   HStack,
-  Link,
-  IconButton,
   Button,
   Menu,
   MenuButton,
@@ -14,7 +11,6 @@ import {
   MenuDivider,
   useDisclosure,
   useColorModeValue,
-  Stack,
   useColorMode,
   Container,
   Text,
@@ -27,42 +23,25 @@ import {
 } from '@chakra-ui/react';
 import { Icon } from '@chakra-ui/react';
 import { 
-  MdClose, 
   MdDarkMode, 
   MdLightMode, 
   MdLogout, 
-  MdMenu, 
   MdOutlineHelp, 
-  MdOutlineSchool, 
   MdPerson,
   MdTranslate, 
 } from 'react-icons/md';
-// import { useRouter } from 'next/router';
 import Support from './Support';
-// import { useNavigate } from 'react-router-dom';
+import { PAGES } from '../../types/hub';
 
-const Links = ['/math', '/writing'];
-const LinkNames = ['Math', 'Writing']
+const Pages = [PAGES.Dashboard, PAGES.JobList];
+const PageNames = ['Dashboard', 'My Jobs']
 
-const NavLink = ({ children, href }: { children: ReactNode, href: string }) => (
-  <Link
-    _hover={{
-      textDecoration: 'none',
-      color: 'gray.500',
-    }}
-    href={href}>
-    {children}
-  </Link>
-);
 
-export default function Header() {
+interface HeaderProps {
+  hubSwitch: (page: (typeof PAGES)[keyof typeof PAGES]) => void
+}
+export default function Header({ hubSwitch }: HeaderProps) {
   const { colorMode, toggleColorMode } = useColorMode();
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const [ lastScrollY, setLastScrollY ] = useState(0);
-  const [ show, setShow ] = useState(true);
-
-  // const navigate = useNavigate();
-  const width = 'full';
 
   const { 
     isOpen: isOpenSupportModal, 
@@ -70,51 +49,19 @@ export default function Header() {
     onClose: onCloseSupportModal
   } = useDisclosure();
 
-  // const controlNavbar = () => {
-  //   if (typeof window !== 'undefined') { 
-  //     if (window.scrollY > lastScrollY) { // if scroll down hide the navbar
-  //       setShow(false); 
-  //     } else { // if scroll up show the navbar
-  //       setShow(true);  
-  //     }
-
-  //     // remember current page location to use in the next move
-  //     setLastScrollY(window.scrollY); 
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   if (typeof window !== 'undefined') {
-  //     window.addEventListener('scroll', controlNavbar);
-
-  //     // cleanup function
-  //     return () => {
-  //       window.removeEventListener('scroll', controlNavbar);
-  //     };
-  //   }
-  // }, [lastScrollY]);
 
   return (
     <>
       <Flex 
         bg={useColorModeValue('gray.100', 'gray.900')} 
         px={4} 
-        w={width}
+        w='full'
         position='fixed'
         as='header'
         zIndex={100}
-        hidden={!show}
-        // shadow='sm'
       >
         <Container maxW="5xl">
           <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
-            <IconButton
-              size={'md'}
-              icon={isOpen ? <Icon as={MdClose} boxSize={6} /> : <Icon as={MdMenu} boxSize={6} />}
-              aria-label={'Open Menu'}
-              display={{ md: 'none' }}
-              onClick={isOpen ? onClose : onOpen}
-            />
             <HStack spacing={8} alignItems={'flex-end'}>
               <Box color={'teal.400'}>
                 <Icon as={MdTranslate}  boxSize={8}/> 
@@ -124,16 +71,16 @@ export default function Header() {
               </Box>
               <HStack
                 as={'nav'}
-                spacing={4}
-                display={{ base: 'none', md: 'flex' }}
+                spacing={0}
               >
-                {Links.map((link, index) => (
-                  <NavLink 
-                    key={link} 
-                    href={link}
+                {Pages.map((page, index) => (
+                  <Button 
+                    variant='ghost'
+                    onClick={() => hubSwitch(page)}
+                    key={`${page}-${index}`}
                   >
-                    {LinkNames[index]}
-                  </NavLink>
+                    {PageNames[index]}
+                  </Button>
                 ))}
               </HStack>
             </HStack>
@@ -147,7 +94,7 @@ export default function Header() {
                   minW={0}>
                   <Avatar
                     size={'md'}
-                    name={"Lillian Yu"}
+                    // name={"Lillian Yu"}
                     // src={user.picture}
                     showBorder
                     borderWidth='2px'
@@ -184,16 +131,6 @@ export default function Header() {
               </Menu>
             </Flex>
           </Flex>
-
-          {isOpen ? (
-            <Box pb={4} display={{ md: 'none' }}>
-              <Stack as={'nav'} spacing={4}>
-                {Links.map((link, index) => (
-                  <NavLink key={link} href={link}>{LinkNames[index]}</NavLink>
-                ))}
-              </Stack>
-            </Box>
-          ) : null}
         </Container>
       </Flex>
 

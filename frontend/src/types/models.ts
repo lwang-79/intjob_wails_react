@@ -57,3 +57,29 @@ export type Job = {
 	RateID: number
 	Rate?: Rate
 }
+
+export type Response = {
+	Result: any
+	Status: string
+}
+
+export const JOB_STATUS = {
+	Booked: 1,
+	Canceled: 2,
+	Completed: 3,
+}
+
+export const JOB_CATEGORY = {
+	Telephone: 1,
+	OnSite: 2,
+	Video: 3,
+	Others: 4
+}
+
+export const JOB_TYPE = {
+	BH: 1,
+	ABH: 2,
+	SAT: 3,
+	SUN: 4,
+	PH: 5
+}

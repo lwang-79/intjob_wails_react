@@ -79,8 +79,8 @@ func (a *App) SaveHoliday(holiday repository.Holiday) repository.Response {
 	return repository.SaveHoliday(holiday)
 }
 
-func (a *App) ListAllHolidays() repository.Response {
-	return repository.ListAllHolidays()
+func (a *App) ListHolidays(lastDate string) repository.Response {
+	return repository.ListHolidays(lastDate)
 }
 
 func (a *App) DeleteHoliday(holiday repository.Holiday) repository.Response {
@@ -95,8 +95,8 @@ func (a *App) SaveJob(job repository.Job) repository.Response {
 	return repository.SaveJob(job)
 }
 
-func (a *App) ListAllJobs() repository.Response {
-	return repository.ListAllJobs()
+func (a *App) ListJobs(lastDate string, limit int) repository.Response {
+	return repository.ListJobs(lastDate, limit)
 }
 
 func (a *App) DeleteJob(job repository.Job) repository.Response {

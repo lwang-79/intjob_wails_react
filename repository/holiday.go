@@ -17,11 +17,18 @@ func GetHolidayById(id uint) Response {
 	return Response{Result: holiday, Status: successOrError(err)}
 }
 
-func ListAllHolidays() Response {
+func ListHolidays(lastDate string) Response {
 	db := openDatabase()
 
+	if lastDate == "" {
+		lastDate = "9999-12-31 23:59:59"
+	}
+
 	var holidays []Holiday
-	err := db.Find(&holidays).Error
+	err := db.Limit(100).
+		Order("date desc").
+		Where("date < ?", lastDate).
+		Find(&holidays).Error
 
 	closeDatabase(db)
 

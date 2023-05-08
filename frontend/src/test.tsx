@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import {DeleteAgent, GetAgentById, GetCurrentDir, GetHolidayById, GetIndustryById, GetRateById, ListAllAgents, ListAllRates, SaveAgent, SaveJob} from "../wailsjs/go/main/App";
 import { Button } from '@chakra-ui/react';
-import { Agent, Holiday, Industry, Job, Rate } from './models';
+import { Agent, Holiday, Industry, Job, Rate } from './types/models';
 
 function test() {
 

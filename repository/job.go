@@ -28,11 +28,21 @@ func GetJobById(id uint) Response {
 	return Response{Result: job, Status: successOrError(err)}
 }
 
-func ListAllJobs() Response {
+func ListJobs(lastDate string, limit int) Response {
 	db := openDatabase()
 
+	if lastDate == "" {
+		lastDate = "9999-12-31 23:59:59"
+	}
+
 	var jobs []Job
-	err := db.Preload("Agent").Preload("Industry").Preload("Rate").Find(&jobs).Error
+	err := db.Preload("Agent").
+		Preload("Industry").
+		Preload("Rate").
+		Limit(limit).
+		Order("start_at desc").
+		Where("start_at < ?", lastDate).
+		Find(&jobs).Error
 
 	closeDatabase(db)
 
