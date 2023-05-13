@@ -14,7 +14,7 @@ import {
   useBoolean
 } from '@chakra-ui/react';
 import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md';
-import { makeAgentColumnData, makeAgentColumnOptions, makeIndustryPieOptions } from '../../types/chat';
+import { makeAgentColumnData, makeAgentColumnOptions, makeIndustryPieOptions } from '../../types/chart';
 
 const monthNames = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -22,7 +22,7 @@ const monthNames = [
 ];
 
 function AgentAndIndustryChart({ jobs }: { jobs: Job[] }) {
-  const [ options, setOptions ] = useState<any>({}); 
+  const [ options, setOptions ] = useState<any>(); 
   const [ category, setCategory ] = useState('Agent');
   const [ shouldRender, setShouldRender ] = useBoolean(true);
   const today = new Date();
@@ -145,10 +145,10 @@ function AgentAndIndustryChart({ jobs }: { jobs: Job[] }) {
         </HStack>
       </VStack>
 
-      <HighchartsReact
+      {options && <HighchartsReact
         highcharts={Highcharts}
         options={options}
-      />
+      />}
     </Card>
   )
 }

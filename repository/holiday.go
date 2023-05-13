@@ -17,6 +17,18 @@ func GetHolidayById(id uint) Response {
 	return Response{Result: holiday, Status: successOrError(err)}
 }
 
+func GetHolidayByDate(date string) Response {
+	db := openDatabase()
+
+	var holiday Holiday
+	err := db.Limit(100).
+		Where("date = ?", date).
+		First(&holiday).Error
+
+	closeDatabase(db)
+	return Response{Result: holiday, Status: successOrError(err)}
+}
+
 func ListHolidays(lastDate string) Response {
 	db := openDatabase()
 

@@ -2,7 +2,7 @@ import { HighchartsReact } from 'highcharts-react-official'
 import Highcharts from "highcharts/highstock";
 import { Job } from '../../types/models';
 import { useEffect, useRef, useState } from 'react';
-import { makeJobColumnData, makeJobColumnOptions } from '../../types/chat';
+import { makeJobColumnData, makeJobColumnOptions } from '../../types/chart';
 import { 
   Card, 
   HStack, 
@@ -18,7 +18,7 @@ import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md';
 
 function JobByDateChart({ jobs }: { jobs: Job[] }) {
 
-  const [ options, setOptions ] = useState<any>({}); 
+  const [ options, setOptions ] = useState<any>(); 
   const [ category, setCategory ] = useState('Day');
   const [ shouldRender, setShouldRender ] = useBoolean(true);
   const today = new Date();
@@ -170,10 +170,10 @@ function JobByDateChart({ jobs }: { jobs: Job[] }) {
         </HStack>
       </VStack>
 
-      <HighchartsReact
+      {options && <HighchartsReact
         highcharts={Highcharts}
         options={options}
-      />
+      />}
     </Card>
   )
 }

@@ -1,16 +1,16 @@
 export type ShowStatus = {
   dashboard: boolean;
-  jobList: boolean;
+  jobsPanel: boolean;
 }
 
 export const PAGES = {
   Dashboard: 'dashboard',
-  JobList: 'jobList',
+  JobsPanel: 'jobsPanel',
 }
 
 export const DEFAULT_SHOW_STATUS: ShowStatus = {
   dashboard: true,
-  jobList: false,
+  jobsPanel: false,
 }
 
 export const changeStatus = (

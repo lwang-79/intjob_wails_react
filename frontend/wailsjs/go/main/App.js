@@ -30,6 +30,10 @@ export function GetCurrentDir() {
   return window['go']['main']['App']['GetCurrentDir']();
 }
 
+export function GetHolidayByDate(arg1) {
+  return window['go']['main']['App']['GetHolidayByDate'](arg1);
+}
+
 export function GetHolidayById(arg1) {
   return window['go']['main']['App']['GetHolidayById'](arg1);
 }
@@ -42,8 +46,20 @@ export function GetJobById(arg1) {
   return window['go']['main']['App']['GetJobById'](arg1);
 }
 
+export function GetJobsByDate(arg1, arg2) {
+  return window['go']['main']['App']['GetJobsByDate'](arg1, arg2);
+}
+
+export function GetJobsByFilter(arg1, arg2, arg3, arg4) {
+  return window['go']['main']['App']['GetJobsByFilter'](arg1, arg2, arg3, arg4);
+}
+
 export function GetRateById(arg1) {
   return window['go']['main']['App']['GetRateById'](arg1);
+}
+
+export function GetRatesByAgentTypeAndCategory(arg1, arg2, arg3) {
+  return window['go']['main']['App']['GetRatesByAgentTypeAndCategory'](arg1, arg2, arg3);
 }
 
 export function ListAllAgents() {
@@ -62,8 +78,8 @@ export function ListHolidays(arg1) {
   return window['go']['main']['App']['ListHolidays'](arg1);
 }
 
-export function ListJobs(arg1, arg2) {
-  return window['go']['main']['App']['ListJobs'](arg1, arg2);
+export function ListJobs(arg1, arg2, arg3) {
+  return window['go']['main']['App']['ListJobs'](arg1, arg2, arg3);
 }
 
 export function SaveAgent(arg1) {

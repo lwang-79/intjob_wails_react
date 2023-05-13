@@ -16,13 +16,21 @@ export function GetAgentById(arg1:number):Promise<repository.Response>;
 
 export function GetCurrentDir():Promise<string>;
 
+export function GetHolidayByDate(arg1:string):Promise<repository.Response>;
+
 export function GetHolidayById(arg1:number):Promise<repository.Response>;
 
 export function GetIndustryById(arg1:number):Promise<repository.Response>;
 
 export function GetJobById(arg1:number):Promise<repository.Response>;
 
+export function GetJobsByDate(arg1:string,arg2:string):Promise<repository.Response>;
+
+export function GetJobsByFilter(arg1:string,arg2:string,arg3:string,arg4:number):Promise<repository.Response>;
+
 export function GetRateById(arg1:number):Promise<repository.Response>;
+
+export function GetRatesByAgentTypeAndCategory(arg1:number,arg2:number,arg3:number):Promise<repository.Response>;
 
 export function ListAllAgents():Promise<repository.Response>;
 
@@ -32,7 +40,7 @@ export function ListAllRates():Promise<repository.Response>;
 
 export function ListHolidays(arg1:string):Promise<repository.Response>;
 
-export function ListJobs(arg1:string,arg2:number):Promise<repository.Response>;
+export function ListJobs(arg1:string,arg2:Array<number>,arg3:number):Promise<repository.Response>;
 
 export function SaveAgent(arg1:repository.Agent):Promise<repository.Response>;
 

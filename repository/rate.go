@@ -32,6 +32,18 @@ func GetRateById(id uint) Response {
 	return Response{Result: rate, Status: successOrError(err)}
 }
 
+func GetRatesByAgentTypeAndCategory(agentId uint, typeId int, categoryId int) Response {
+	db := openDatabase()
+	var rates []Rate
+	err := db.Preload("Agent").
+		Where("agent_id = ? and type = ? and category = ?", agentId, typeId, categoryId).
+		Find(&rates).Error
+
+	closeDatabase(db)
+
+	return Response{Result: rates, Status: successOrError(err)}
+}
+
 func ListAllRates() Response {
 	db := openDatabase()
 

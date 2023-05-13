@@ -1,5 +1,5 @@
 import { ListAllAgents } from "../../wailsjs/go/main/App";
-import { Job } from "./models";
+import { JOB_STATUS, Job } from "./models";
 import { getWeekNumber, splitNumbers } from "./utils";
 
 type ChartData = {
@@ -27,6 +27,7 @@ export const makeJobColumnData = (
   category: 'Day' | 'Week' | 'Month'
 ): ChartData => {
   const filteredJobs = jobs.filter(job => 
+    job.Status === JOB_STATUS.Completed &&
     new Date(job.StartAt).toLocaleDateString('sv-SE') >= startDate.toLocaleDateString('sv-SE') && 
     new Date(job.StartAt).toLocaleDateString('sv-SE') <= endDate.toLocaleDateString('sv-SE')
   );
@@ -237,7 +238,7 @@ export const makeJobColumnOptions = (data: ChartData): any => {
         } else if (this.series.name === 'Jobs') {
           return `${this.series.name}: ${this.y}`;
         } else if (this.series.name === 'Worked Hours') {
-          return `${this.series.name}: ${this.y} h`;
+          return `${this.series.name}: ${this.y} hours`;
         }
       }
     },
@@ -277,6 +278,7 @@ export const makeAgentColumnData = (
   endDate: Date,
 ): ChartData => {
   const filteredJobs = jobs.filter(job => 
+    job.Status === JOB_STATUS.Completed &&
     new Date(job.StartAt).toLocaleDateString('sv-SE') >= startDate.toLocaleDateString('sv-SE') && 
     new Date(job.StartAt).toLocaleDateString('sv-SE') <= endDate.toLocaleDateString('sv-SE')
   );
@@ -435,6 +437,7 @@ export const makeIndustryPieOptions = (
   endDate: Date,
 ) => {
   const filteredJobs = jobs.filter(job => 
+    job.Status === JOB_STATUS.Completed &&
     new Date(job.StartAt).toLocaleDateString('sv-SE') >= startDate.toLocaleDateString('sv-SE') && 
     new Date(job.StartAt).toLocaleDateString('sv-SE') <= endDate.toLocaleDateString('sv-SE')
   );
@@ -575,6 +578,7 @@ export const makeIncomeLineChartOptions = (
   endDate: Date,
 ) => {
   const filteredJobs = jobs.filter(job => 
+    job.Status === JOB_STATUS.Completed &&
     new Date(job.StartAt).toLocaleDateString('sv-SE') >= startDate.toLocaleDateString('sv-SE') && 
     new Date(job.StartAt).toLocaleDateString('sv-SE') <= endDate.toLocaleDateString('sv-SE')
   );

@@ -59,6 +59,10 @@ func (a *App) GetRateById(id uint) repository.Response {
 	return repository.GetRateById(id)
 }
 
+func (a *App) GetRatesByAgentTypeAndCategory(agentId uint, typeId int, categoryId int) repository.Response {
+	return repository.GetRatesByAgentTypeAndCategory(agentId, typeId, categoryId)
+}
+
 func (a *App) SaveRate(rate repository.Rate) repository.Response {
 	return repository.SaveRate(rate)
 }
@@ -73,6 +77,10 @@ func (a *App) DeleteRate(rate repository.Rate) repository.Response {
 
 func (a *App) GetHolidayById(id uint) repository.Response {
 	return repository.GetHolidayById(id)
+}
+
+func (a *App) GetHolidayByDate(date string) repository.Response {
+	return repository.GetHolidayByDate(date)
 }
 
 func (a *App) SaveHoliday(holiday repository.Holiday) repository.Response {
@@ -95,8 +103,16 @@ func (a *App) SaveJob(job repository.Job) repository.Response {
 	return repository.SaveJob(job)
 }
 
-func (a *App) ListJobs(lastDate string, limit int) repository.Response {
-	return repository.ListJobs(lastDate, limit)
+func (a *App) ListJobs(lastDate string, status []int, limit int) repository.Response {
+	return repository.ListJobs(lastDate, status, limit)
+}
+
+func (a *App) GetJobsByDate(startDate, endDate string) repository.Response {
+	return repository.GetJobsByDate(startDate, endDate)
+}
+
+func (a *App) GetJobsByFilter(filterName, filterValue string, lastDate string, limit int) repository.Response {
+	return repository.GetJobsByFilter(filterName, filterValue, lastDate, limit)
 }
 
 func (a *App) DeleteJob(job repository.Job) repository.Response {

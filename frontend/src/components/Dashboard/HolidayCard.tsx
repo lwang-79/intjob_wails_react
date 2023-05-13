@@ -1,4 +1,4 @@
-import { Button, Card, HStack, Spacer, Text, VStack } from "@chakra-ui/react"
+import { Button, Card, Divider, HStack, Spacer, Text, VStack } from "@chakra-ui/react"
 import { useEffect, useState } from "react"
 import { Holiday, Response } from "../../types/models"
 import { ListHolidays } from "../../../wailsjs/go/main/App";
@@ -37,7 +37,8 @@ function HolidayCard() {
   return (
     <Card w='full'>
       <VStack p={4} align='flex-start'>
-        <Text>🏖️ Upcoming Public Holidays:</Text>
+        <Text>🏖️ Upcoming Public Holidays</Text>
+        <Divider />
         {holidays.map((holiday, index) => (
           <HStack key={index} w='full'>
             <Text fontSize='sm'>{holiday.Date.slice(0,10)}</Text>

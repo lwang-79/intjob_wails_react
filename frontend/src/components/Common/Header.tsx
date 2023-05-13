@@ -33,7 +33,7 @@ import {
 import Support from './Support';
 import { PAGES } from '../../types/hub';
 
-const Pages = [PAGES.Dashboard, PAGES.JobList];
+const Pages = [PAGES.Dashboard, PAGES.JobsPanel];
 const PageNames = ['Dashboard', 'My Jobs']
 
 

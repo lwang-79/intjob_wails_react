@@ -2,7 +2,7 @@ import { HStack, Spacer, VStack, useColorMode } from '@chakra-ui/react';
 import Highcharts from "highcharts/highstock";
 import { useEffect, useMemo, useState } from 'react'
 import JobByDateChart from './JobByDateChart';
-import { Job, Response } from '../../types/models';
+import { JOB_STATUS, Job, Response } from '../../types/models';
 import { ListJobs } from '../../../wailsjs/go/main/App';
 import AgentAndIndustryChart from './AgentAndIndustryChart';
 import IncomeLineChart from './IncomeLineChart';
@@ -18,7 +18,7 @@ function Dashboard() {
   },[]);
 
   const getAndSetAllJobs = async () => {
-    const response: Response = await ListJobs('', 1000);
+    const response: Response = await ListJobs('', [], 1000);
     if (response.Status !== 'success') {
       console.error(response.Status);
       return;

@@ -11,7 +11,7 @@ import { Job } from "../../types/models"
 import { HighchartsReact } from "highcharts-react-official"
 import Highcharts from "highcharts/highstock";
 import { useEffect, useRef, useState } from "react";
-import { makeIncomeLineChartOptions } from "../../types/chat";
+import { makeIncomeLineChartOptions } from "../../types/chart";
 import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md';
 
 const monthNames = [
@@ -20,13 +20,7 @@ const monthNames = [
 ];
 
 function IncomeLineChart({ jobs }: { jobs: Job[] }) {
-  const [ options, setOptions ] = useState<any>({ 
-    tooltip: {
-      xDateFormat: '%Y-%m-%d',
-      pointFormat: '{series.name}: ${point.y:.2f}',
-    },
-    legend: false 
-  }); 
+  const [ options, setOptions ] = useState<any>(); 
   const [ totalIncome, setTotalIncome ] = useState<number>(0);
   const [ shouldRender, setShouldRender ] = useBoolean(true);
   const today = new Date();
@@ -120,10 +114,10 @@ function IncomeLineChart({ jobs }: { jobs: Job[] }) {
           )}
         </HStack>
       </VStack>
-      <HighchartsReact
+      {options && <HighchartsReact
         highcharts={Highcharts}
         options={options}
-      />
+      />}
     </Card>
   )
 }
