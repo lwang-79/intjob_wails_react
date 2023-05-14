@@ -85,21 +85,23 @@ function changeArrayByItem<T extends {ID?: number}> (
 	item: T,
 	type: 'add' | 'update' | 'delete'
 ): T[]{
-	const index = items.findIndex(i => i.ID === item.ID);
-    if (index === -1) return items;
 
-		if (type === 'add') {
-			items.unshift(item);
-		}
-
-    if (type === 'update') {
-      items[index] = item;
-    }
-    if (type === 'delete') {
-      items.splice(index, 1);
-    }
-
+	if (type === 'add') {
+		items.unshift(item);
 		return items;
+	}
+
+	const index = items.findIndex(i => i.ID === item.ID);
+	if (index === -1) return items;
+
+	if (type === 'update') {
+		items[index] = item;
+	}
+	if (type === 'delete') {
+		items.splice(index, 1);
+	}
+
+	return items;
 }
 
 export {

@@ -23,6 +23,7 @@ import {
 } from "@chakra-ui/react";
 import { MdAdd, MdDateRange, MdOutlineFilterList, MdOutlineSearch, MdRefresh } from "react-icons/md";
 import JobForm from "../Forms/JobForm";
+import { changeArrayByItem } from "../../types/utils";
 
 function JobsPanel() {
   const allJobsRef = useRef<Job[]>([]);
@@ -190,6 +191,13 @@ function JobsPanel() {
     setShowLoadButton(true);
   }
 
+  const jobChangedHandler = (job: Job, type: 'add' | 'update' | 'delete') => {
+    console.log(job, type)
+    allJobsRef.current = changeArrayByItem([...allJobsRef.current], job, type);
+    console.log(allJobsRef.current);
+    setJobs(allJobsRef.current);
+  }
+
   return (
     <VStack w='5xl' spacing={4}>
       <HStack w='full' px={4}>
@@ -197,7 +205,6 @@ function JobsPanel() {
           <Icon as={MdOutlineFilterList} boxSize={6} />
           <Select
             size='sm'
-            rounded='lg'
             value={selectedOptionName}
             onChange={(event) => setSelectedOptionName(event.target.value)}
             w='100px'
@@ -208,7 +215,6 @@ function JobsPanel() {
           </Select>
           <Select
             size='sm'
-            rounded='lg'
             value={selectedOptionValue}
             onChange={(event) => setSelectedOptionValue(event.target.value)}
             w='100px'
@@ -278,11 +284,12 @@ function JobsPanel() {
         isOpen={isOpenJobForm}
         onClose={onCloseJobForm}
         closeOnOverlayClick={false}
+        id='job-form-modal'
       >
         <ModalOverlay />
         <ModalContent>
           <ModalCloseButton  />
-            <JobForm closeCallBack={onCloseJobForm}/>
+            <JobForm closeCallBack={onCloseJobForm} onFinishCallBack={jobChangedHandler}/>
         </ModalContent>
       </Modal>
     </VStack>

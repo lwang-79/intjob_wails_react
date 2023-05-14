@@ -56,6 +56,9 @@ export type Job = {
 	Status: number
 	RateID: number
 	Rate?: Rate
+	Address?: string
+	Location?: string
+	Traffic?: string
 }
 
 export type Response = {

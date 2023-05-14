@@ -33,8 +33,8 @@ import {
 import Support from './Support';
 import { PAGES } from '../../types/hub';
 
-const Pages = [PAGES.Dashboard, PAGES.JobsPanel];
-const PageNames = ['Dashboard', 'My Jobs']
+const Pages = [PAGES.Dashboard, PAGES.JobsPanel, PAGES.Report];
+const PageNames = ['Dashboard', 'My Jobs', 'Report']
 
 
 interface HeaderProps {

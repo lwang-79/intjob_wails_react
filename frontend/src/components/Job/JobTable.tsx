@@ -94,6 +94,7 @@ function JobTable({ jobs, loadMoreJobs, shouldShowButton }: JobTableProps) {
       <Modal
         isOpen={isOpenJobCard}
         onClose={onCloseJobCard}
+        id='job-form-modal'
       >
         <ModalOverlay />
         <ModalContent>

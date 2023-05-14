@@ -1,5 +1,5 @@
 import { 
-  Button, Divider, HStack, Spacer, Text, VStack, useDisclosure, useToast 
+  Button, Divider, HStack, Icon, Progress, Spacer, Text, VStack, useDisclosure, useToast 
 } from "@chakra-ui/react"
 import { JOB_CATEGORY, JOB_STATUS, Job, Response } from "../../types/models"
 import { getKeyByValue, jobCategoryIcon, jobStatusIcon, jobTypeIcon } from "../../types/utils"
@@ -7,6 +7,9 @@ import { useRef, useState } from "react"
 import JobForm from "../Forms/JobForm"
 import DeleteAlert from "../Common/CommonAlert"
 import { DeleteJob } from "../../../wailsjs/go/main/App"
+import { CalculateRouteSummary } from "@aws-sdk/client-location"
+import { getAndUpdateJobTraffic } from "../../types/job"
+import { MdDirectionsCar, MdOutlineLocationOn } from "react-icons/md"
 
 interface JobCardProps {
   job: Job,
@@ -18,6 +21,8 @@ function JobCard({ job, onFinishCallBack, closeCallBack }: JobCardProps) {
   const [ isCardDetail, setIsCardDetail ] = useState(true)
   const cancelRef = useRef(null);
   const toast = useToast();
+  const traffic = job.Traffic ? JSON.parse(job.Traffic) as CalculateRouteSummary : '';
+  const [ isInProgress, setIsInProgress ] = useState<boolean>(false);
 
   const { 
     isOpen: isOpenAlert, 
@@ -26,10 +31,13 @@ function JobCard({ job, onFinishCallBack, closeCallBack }: JobCardProps) {
   } = useDisclosure();
 
   const deleteJob = async () => {
+    onCloseAlert();
+    setIsInProgress(true);
+
     const response: Response = await DeleteJob(job);
 
     if (response.Status !== 'success') {
-      console.log(response.Status);
+      console.error(response.Status);
       toast({
         description: "Failed to delete the job, please contact the administrator.",
         status: 'error',
@@ -37,15 +45,19 @@ function JobCard({ job, onFinishCallBack, closeCallBack }: JobCardProps) {
         isClosable: true,
         position: 'top'
       });
+      setIsInProgress(false);
       if (closeCallBack) closeCallBack();
       return;
     } else {
+      await getAndUpdateJobTraffic(job);
+
       toast({
         description: "Job deleted successfully.",
         status: 'success',
         duration: 3000,
         isClosable: true,
       });
+      setIsInProgress(false);
       if (closeCallBack) closeCallBack();
       if (onFinishCallBack) onFinishCallBack(job, 'delete');
     }
@@ -64,48 +76,70 @@ function JobCard({ job, onFinishCallBack, closeCallBack }: JobCardProps) {
 
           <VStack w='full' px={8} align='flex-end'>
             <HStack w='full' spacing={4} pt={2}>
-              <Text fontSize='lg' w='25%'>Agent:</Text>
-              <Text fontSize='lg'>{job.Agent?.Name}</Text>
+              <Text w='25%'>Agent:</Text>
+              <Text >{job.Agent?.Name}</Text>
             </HStack>
             <HStack w='full' spacing={4}>
-              <Text fontSize='lg' w='25%'>Category:</Text>
-              <Text fontSize='lg'>{getKeyByValue(JOB_CATEGORY,job.Rate!.Category)}</Text>
+              <Text w='25%'>Category:</Text>
+              <Text>{getKeyByValue(JOB_CATEGORY,job.Rate!.Category)}</Text>
             </HStack>
             <HStack w='full' spacing={4}>
-              <Text fontSize='lg' w='25%'>Customer:</Text>
-              <Text fontSize='lg'>{job.Industry?.Name}</Text>
+              <Text w='25%'>Customer:</Text>
+              <Text>{job.Industry?.Name}</Text>
             </HStack>
             <HStack w='full' spacing={4}>
-              <Text fontSize='lg' w='25%'>Start At:</Text>
-              <Text fontSize='lg'>{new Date(job.StartAt).toLocaleString('sv-SE')}</Text>
+              <Text w='25%'>Start At:</Text>
+              <Text>{new Date(job.StartAt).toLocaleString('sv-SE')}</Text>
             </HStack>
             <HStack w='full' spacing={4}>
-              <Text fontSize='lg' w='25%'>Rate:</Text>
-              <Text fontSize='lg'>{job.Rate?.Name}</Text>
+              <Text w='25%'>Rate:</Text>
+              <Text>{job.Rate?.Name}</Text>
             </HStack>
             <HStack w='full' spacing={4}>
-              <Text fontSize='lg' w='25%'>Duration:</Text>
-              <Text fontSize='lg'>{job.Duration} minutes</Text>
+              <Text w='25%'>Duration:</Text>
+              <Text>{job.Duration} minutes</Text>
             </HStack>
             <HStack w='full' spacing={4}>
-              <Text fontSize='lg' w='25%'>Income:</Text>
-              <Text fontSize='lg'>💰 {job.Income.toFixed(2)}</Text>
+              <Text w='25%'>Income:</Text>
+              <Text>💰 {job.Income.toFixed(2)}</Text>
             </HStack>
-            <HStack w='full' spacing={4} align='flex-start'>
-              <Text fontSize='lg' w='25%'>Comments:</Text>
-              <Text fontSize='lg'>{job.Comments}</Text>
-            </HStack>
+            {job.Comments &&
+              <HStack w='full' spacing={4} align='flex-start'>
+                <Text w='25%'>Comments:</Text>
+                <Text>{job.Comments}</Text>
+              </HStack>
+            }
             {job.Status === JOB_STATUS.Canceled && job.CancelAt &&
                 <HStack w='full' spacing={4}>
-                  <Text fontSize='lg'>Canceled At:</Text>
-                  <Text fontSize='lg'>{new Date(job.CancelAt).toLocaleString('sv-SE')}</Text>
+                  <Text>Canceled At:</Text>
+                  <Text>{new Date(job.CancelAt).toLocaleString('sv-SE')}</Text>
                 </HStack>
               }
-            <HStack>
-              <Spacer />
-              <Text fontSize='xs' fontStyle='italic' fontWeight='light' >#{job.ID}</Text>
-            </HStack>
+            <VStack w='full' align='flex-start'>
+              <HStack w='full' align='flex-end'>
+                {job.Address && 
+                  <HStack align='flex-start'>
+                    <Icon as={MdOutlineLocationOn} color='red' boxSize={5} />
+                    <Text fontSize='sm'>{` ${job.Address}`}</Text>
+                  </HStack>
+                }
+                <Spacer />
+                {!traffic && <Text fontSize='xs' fontStyle='italic' fontWeight='light' >#{job.ID}</Text>}
+              </HStack>
 
+              {traffic && 
+                <VStack align='flex-start' w='full' spacing={0}>
+                  <HStack w='full' align='flex-start'>
+                    <Icon as={MdDirectionsCar} color='teal' boxSize={5} /> 
+                    <Text fontSize='sm'>
+                      {` ${(traffic.Distance)?.toFixed(1)} ${traffic.DistanceUnit} - ${(Number(traffic.DurationSeconds)/60).toFixed(0)} minutes`}
+                    </Text>
+                    <Spacer />
+                    <Text fontSize='xs' fontStyle='italic' fontWeight='light' >#{job.ID}</Text>
+                  </HStack>
+                </VStack>
+              }
+            </VStack>
           </VStack>
 
           
@@ -125,8 +159,11 @@ function JobCard({ job, onFinishCallBack, closeCallBack }: JobCardProps) {
               <Text w='full'>$ {job.Rate?.EachTimeRate.toFixed(2)} / {job.Rate?.EachTime} minutes</Text>
             </HStack>
           </VStack>
+          { isInProgress &&
+            <Progress size='sm' isIndeterminate w='full'/>
+          }
           <Divider />
-          <HStack w='full' pt={4} spacing={0}>
+          <HStack w='full' spacing={0}>
             <Button
               w='full'
               onClick={()=>{setIsCardDetail(false)}}
@@ -147,42 +184,6 @@ function JobCard({ job, onFinishCallBack, closeCallBack }: JobCardProps) {
       ) : (
         <JobForm job={job} onFinishCallBack={onFinishCallBack} closeCallBack={closeCallBack}/>
       )}
-
-      {/* <AlertDialog
-        isOpen={isOpenAlert}
-        leastDestructiveRef={cancelRef}
-        onClose={onCloseAlert}
-      >
-        <AlertDialogOverlay>
-          <AlertDialogContent>
-            <AlertDialogHeader fontSize='lg' fontWeight='bold'>
-              Delete 
-            </AlertDialogHeader>
-
-            <AlertDialogBody>
-              Are you sure? You can not undo this action afterwards.
-            </AlertDialogBody>
-
-            <AlertDialogFooter>
-              <Button
-                ref={cancelRef} 
-                onClick={onCloseAlert}
-                px={6}
-              >
-                Cancel
-              </Button>
-              <Button 
-                colorScheme='red' 
-                px={6}
-                onClick={()=>{}} 
-                ml={3}
-              >
-                Delete
-              </Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog> */}
 
       <DeleteAlert
         name='Job'

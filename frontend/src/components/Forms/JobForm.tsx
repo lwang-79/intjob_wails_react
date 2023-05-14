@@ -1,9 +1,20 @@
-import { Button, Divider, HStack, Input, Radio, RadioGroup, Select, Spacer, Text, VStack, useToast } from "@chakra-ui/react";
-import { Agent, Industry, JOB_CATEGORY, JOB_STATUS, JOB_TYPE, Job, Rate, Response } from "../../types/models"
-import { useEffect, useRef, useState } from "react";
+import { Box, Button, Divider, HStack, Input, Progress, Radio, RadioGroup, Select, Spacer, Text, VStack, useColorModeValue, useToast } from "@chakra-ui/react";
+import { Agent, Industry, JOB_CATEGORY, JOB_STATUS, Job, Rate, Response } from "../../types/models"
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { GetRatesByAgentTypeAndCategory, ListAllAgents, ListAllIndustries, SaveJob } from "../../../wailsjs/go/main/App";
-import { calculateIncome, getJobType } from "../../types/job";
+import { calculateIncome, getAndUpdateJobTraffic, getJobType } from "../../types/job";
 import { getKeyByValue, jobTypeIcon } from "../../types/utils";
+import { getPlace, searchPlaceIndex } from "../../types/location";
+
+interface SearchedPlace {
+  PlaceId: string
+  Text: string
+}
+
+interface Location {
+  address: string
+  geometry: string
+}
 
 interface JobFormProps {
   job?: Job
@@ -15,7 +26,6 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
   const isNew = !job;
   const title = isNew ? "Add Job" : "Edit Job";
   const categories = Object.values(JOB_CATEGORY);
-  const statuses = Object.keys(JOB_STATUS);
   const [ agents, setAgents ] = useState<Agent[]>([]);
   const [ industries, setIndustries ] = useState<Industry[]>([]);
   const [ rates, setRates ] = useState<Rate[]>([]);
@@ -29,8 +39,22 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
     !isNew && job.AgentJobNumber ? job.AgentJobNumber : ''
   );
   const commentsRef = useRef<string>(!isNew && job.Comments ? job.Comments : '');
+  const [ placeOptions, setPlaceOptions ] = useState<SearchedPlace[]>([]);
+  const [ selectedLocation, setSelectedLocation ] = useState<Location>(job ? {
+    address: job.Address?? '',
+    geometry: job.Location?? ''
+  } : {
+    address: '',
+    geometry: ''
+  });
+
   const [ isFirstRender, setIsFirstRender ] = useState<boolean>(true);
   const toast = useToast();
+  const [boxPosition, setBoxPosition] = useState({ top: 0, left: 0 });
+  const autoCompleteRef = useRef<HTMLInputElement>(null);
+  const [ autoCompleteWidth, setAutoCompleteWidth] = useState(0);
+  const fontColor = useColorModeValue('gray.900', 'gray.50');
+  const [ isInProgress, setIsInProgress ] = useState<boolean>(false);
 
 
   const [ formState, setFormState ] = useState<Job>(job ? {
@@ -55,7 +79,29 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
 
   useEffect(() => {
     init();
-  }, []);
+  },[]);
+
+  useLayoutEffect(() => {
+    const inputElement = autoCompleteRef.current;
+    if (!inputElement) {
+      return;
+    }
+  
+    const modalElement = document.getElementById('chakra-modal-job-form-modal');
+    if (!modalElement) {
+      console.log('No modal element');
+      return;
+    }
+
+    const inputRect = inputElement.getBoundingClientRect();
+    const modalRect = modalElement.getBoundingClientRect();
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+    const adjustedTop = inputRect.bottom - modalRect.top + scrollTop;
+    const adjustedLeft = inputRect.left - modalRect.left + scrollLeft;
+    setAutoCompleteWidth(inputRect.width);
+    setBoxPosition({ top: adjustedTop, left: adjustedLeft });
+  }, [placeOptions.length === 0]);
 
   useEffect(() => {
     if (isFirstRender) {
@@ -131,9 +177,7 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
     const rates = await getAndUpdateRates(agents);
 
     if (!isNew) {
-      console.log(formState.RateID)
       const rate = rates.find(rate => rate.ID === formState.RateID);
-      console.log(rate)
       if (rate) {
         setSelectedRate(rate);
         setIncome(calculateIncome(formState, rate));
@@ -200,7 +244,42 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
     }
   }
 
+  const searchPlaces = async (keyWord: string) => {
+    const options = await searchPlaceIndex(keyWord) as SearchedPlace[];
+
+    setPlaceOptions(options);
+  }
+
+  const locationSelectedHandler = async (place: SearchedPlace) => {
+    setPlaceOptions([]);
+
+    setSelectedLocation({
+      ...selectedLocation,
+      address: place.Text,
+    });
+
+    const geometry = await getPlace(place.PlaceId);
+    if (!geometry) {
+      toast({
+        description: "No geometry for this place, try another.",
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+        position: 'top'
+      });
+      return;
+    }
+
+    setSelectedLocation({
+      address: place.Text,
+      geometry: JSON.stringify(geometry)
+    });
+
+  }
+
   const submit = async (button: string) => {
+    setIsInProgress(true);
+
     const startAt = new Date(formState.StartAt).toISOString().replace('.000', '');
 
     const cancelAt = formState.Status === JOB_STATUS.Canceled && 
@@ -217,7 +296,9 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
       AgentJobNumber: agentJobNumberRef.current,
       Comments: commentsRef.current,
       Status : button === 'Complete' ? JOB_STATUS.Completed : 
-        button === 'Book' ? JOB_STATUS.Booked : formState.Status
+        button === 'Book' ? JOB_STATUS.Booked : formState.Status,
+      Address: selectedLocation.address?? undefined,
+      Location: selectedLocation.geometry?? undefined
     }
 
     const response: Response = await SaveJob(newJob);
@@ -231,8 +312,30 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
         isClosable: true,
         position: 'top'
       });
-      if (closeCallBack) closeCallBack();
+      setIsInProgress(false);
       return;
+    } 
+
+    let updatedJob = response.Result as Job;
+
+    const trafficResult = await getAndUpdateJobTraffic(updatedJob);
+    if (trafficResult?.updatedJob) {
+      updatedJob = trafficResult.updatedJob;
+    }
+
+    if (
+      trafficResult && 
+      trafficResult.traffic &&
+      trafficResult.traffic
+    ) {
+      toast({
+        description: `Job saved successfully. 
+          Distance to previous job is ${(trafficResult.traffic.Distance)?.toFixed(1)} ${trafficResult.traffic.DistanceUnit}. 
+          Estimated traffic time is ${(Number(trafficResult.traffic.DurationSeconds)/60).toFixed(0)} minutes`,
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
     } else {
       toast({
         description: "Job saved successfully.",
@@ -242,10 +345,10 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
       });
     }
 
-    const updatedJob = response.Result as Job;
     const type = button === 'Save' ? 'update' : 'add'
     if (onFinishCallBack) onFinishCallBack(updatedJob, type);
     if (closeCallBack) closeCallBack();
+    setIsInProgress(false);
   }
 
   return (
@@ -256,11 +359,12 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
         <VStack w='full' px={4} py={2} align='flex-end'>
           <HStack w='full' spacing={4}>
             <Spacer />
-            <Text fontSize='lg'>Agent:</Text>
+            <Text>Agent:</Text>
             <Select 
               w='70%'
               value={formState.AgentID}
               onChange={setInput('AgentID')}
+              rounded={0}
             >
               {agents.map((agent, index) => (
                 <option 
@@ -274,11 +378,12 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
           </HStack>
           <HStack w='full' spacing={4}>
             <Spacer />
-            <Text fontSize='lg'>Category:</Text>
+            <Text>Category:</Text>
             <Select 
               w='70%'
               value={selectedCategory}
               onChange={(e)=>onCategoryChanged(e)}
+              rounded={0}
             >
               {categories.map((category, index) => (
                 <option 
@@ -292,11 +397,12 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
           </HStack>
           <HStack w='full' spacing={4}>
             <Spacer />
-            <Text fontSize='lg'>Customer:</Text>
+            <Text>Customer:</Text>
             <Select 
               w='70%'
               value={formState.IndustryID}
               onChange={setInput('IndustryID')}
+              rounded={0}
             >
               {industries.map((industry, index) => (
                 <option 
@@ -310,33 +416,92 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
           </HStack>
           <HStack w='full' spacing={4}>
             <Spacer />
-            <Text fontSize='lg'>Job No.:</Text>
+            <Text>Job No.:</Text>
               <Input 
                 w='70%'
                 defaultValue={formState.AgentJobNumber}
                 onChange={(e)=>{agentJobNumberRef.current = e.target.value as string}}
                 placeholder='Agent job number'
+                rounded={0}
               />
           </HStack>
 
           <HStack w='full' spacing={4}>
             <Spacer />
-            <Text fontSize='lg'>{jobTypeIcon(jobType)} Start At:</Text>
+            <Text>Location:</Text>
+            <Input 
+              ref={autoCompleteRef}
+              w='70%'
+              value={selectedLocation?.address}
+              placeholder='Search location'
+              rounded={0}
+              onChange={(e)=>{
+                setSelectedLocation({ address: e.target.value, geometry: '' });
+                searchPlaces(e.target.value);
+              }}
+            />
+          </HStack>
+
+          {placeOptions.length > 0 &&
+            <Box
+              position='absolute'
+              zIndex={100}
+              top={boxPosition.top}
+              left={boxPosition.left}
+              w={autoCompleteWidth}
+              p={2}
+              border={3}
+              borderColor='red'
+              bgColor={useColorModeValue('gray.50', 'gray.800')}
+            >
+              <VStack 
+                spacing={1}
+                align='flex-start'
+                w='full'
+              >
+                {placeOptions.map((place, index) => (
+                  <Text
+                    key={index}
+                    fontSize='xs'
+                    whiteSpace='nowrap'
+                    overflow="hidden"
+                    textOverflow="ellipsis"
+                    w='full'
+                    _hover={{
+                      cursor: 'pointer',
+                      whiteSpace: 'normal',
+                      color: fontColor
+                    }}
+                    onClick={()=>locationSelectedHandler(place)}
+                  >
+                    {place.Text}
+                  </Text>
+                ))}
+              </VStack>
+
+            </Box>
+          }
+
+          <HStack w='full' spacing={4}>
+            <Spacer />
+            <Text>{jobTypeIcon(jobType)} Start At:</Text>
               <Input 
                 type='datetime-local'
                 w='70%'
                 defaultValue={formState.StartAt}
                 step={60}
                 onChange={setInput('StartAt')}
+                rounded={0}
               />
           </HStack>
           <HStack w='full' spacing={4}>
             <Spacer />
-            <Text fontSize='lg'>Rate:</Text>
+            <Text>Rate:</Text>
             <Select 
               w='70%'
               value={formState.RateID}
               onChange={setInput('RateID')}
+              rounded={0}
             >
               {rates.map((rate, index) => (
                 <option 
@@ -350,31 +515,36 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
           </HStack>
           <HStack w='full' spacing={4}>
             <Spacer />
-            <Text fontSize='lg'>Duration:</Text>
+            <Text>Duration:</Text>
             <Input 
               w='70%'
               type='number'
               step={1}
               value={formState.Duration.toString()}
               onChange={setInput('Duration')}
+              rounded={0}
             />
           </HStack>
           <HStack w='full' spacing={4}>
             <Spacer />
-            <Text fontSize='lg'>Comments:</Text>
+            <Text>Comments:</Text>
               <Input 
                 w='70%'
                 defaultValue={formState.Comments}
                 placeholder='Comments'
                 onChange={(e)=>{commentsRef.current = e.target.value as string}}
+                rounded={0}
               />
           </HStack>
+
+          
+
           {!isNew && 
             <>
               <RadioGroup onChange={(v) => setStatus(v)} value={formState.Status.toString()}>
                 <HStack spacing={4} mt={2}>
                   <Spacer />
-                  <Text fontSize='lg'>Status:</Text>
+                  <Text>Status:</Text>
                   <HStack>
                     <Radio value={JOB_STATUS.Booked.toString()}>Booked</Radio>
                     <Radio value={JOB_STATUS.Canceled.toString()}>Canceled</Radio>
@@ -386,13 +556,14 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
               {formState.Status === JOB_STATUS.Canceled && 
                 <HStack w='full' spacing={4}>
                   <Spacer />
-                  <Text fontSize='lg'>Cancel At:</Text>
+                  <Text>Cancel At:</Text>
                     <Input 
                       type='datetime-local'
                       w='70%'
                       defaultValue={formState.CancelAt}
                       step={60}
                       onChange={setInput('CancelAt')}
+                      rounded={0}
                     />
                 </HStack>
               }
@@ -420,7 +591,10 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
           </HStack>
         </VStack>}
         <Divider />
-        <HStack w='full' pt={2} spacing={0}>
+        { isInProgress &&
+          <Progress size='sm' isIndeterminate w='full'/>
+        }
+        <HStack w='full' spacing={0}>
           <Button
             w='full'
             rounded='none'

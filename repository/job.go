@@ -17,6 +17,9 @@ type Job struct {
 	Status         int
 	RateID         uint
 	Rate           Rate
+	Address        string
+	Location       string
+	Traffic        string
 }
 
 func GetJobById(id uint) Response {

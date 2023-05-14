@@ -33,6 +33,7 @@ const theme = extendTheme({
       defaultProps: {
         colorScheme: 'teal',
         variant: 'solid',
+        rounded: '0'
       },
     },
     Checkbox: {

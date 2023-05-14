@@ -9,6 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@aws-sdk/client-cognito-identity": "^3.332.0",
+    "@aws-sdk/client-location": "^3.332.0",
+    "@aws-sdk/credential-provider-cognito-identity": "^3.332.0",
     "@chakra-ui/react": "^2.6.1",
     "@emotion/react": "^11.10.8",
     "@emotion/styled": "^11.10.8",

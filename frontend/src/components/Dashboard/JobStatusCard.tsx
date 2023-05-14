@@ -130,6 +130,7 @@ function JobStatusCard({ jobs }: { jobs: Job[] }) {
         isOpen={isOpenJobForm}
         onClose={onCloseJobForm}
         closeOnOverlayClick={false}
+        id='job-form-modal'
       >
         <ModalOverlay />
         <ModalContent>
