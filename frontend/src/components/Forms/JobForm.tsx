@@ -244,10 +244,16 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
     }
   }
 
+  const timeoutRef = useRef<number|undefined>();
   const searchPlaces = async (keyWord: string) => {
-    const options = await searchPlaceIndex(keyWord) as SearchedPlace[];
 
-    setPlaceOptions(options);
+    clearTimeout(timeoutRef.current);
+    
+    timeoutRef.current = setTimeout(async () => {
+      const options = await searchPlaceIndex(keyWord) as SearchedPlace[];
+
+      setPlaceOptions(options);
+    }, 1000);
   }
 
   const locationSelectedHandler = async (place: SearchedPlace) => {
@@ -439,6 +445,7 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
                 setSelectedLocation({ address: e.target.value, geometry: '' });
                 searchPlaces(e.target.value);
               }}
+              isDisabled={selectedCategory!==JOB_CATEGORY.OnSite}
             />
           </HStack>
 

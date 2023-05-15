@@ -73,9 +73,6 @@ const getAndUpdateJobTraffic = async (
   traffic: CalculateRouteSummary | undefined
   updatedJob: Job
 } | undefined> => {
-  if (!job.Location) return;
-  console.log(job)
-
   const jobTime = new Date(job.StartAt);
   const localStartTime = new Date(jobTime.getFullYear(), jobTime.getMonth(), jobTime.getDate(), 0, 0, 0);
   const localEndTime = new Date(jobTime.getFullYear(), jobTime.getMonth(), jobTime.getDate(), 23, 59, 59);
@@ -99,7 +96,7 @@ const getAndUpdateJobTraffic = async (
     updatedJob: job
   }
 
-  // If this job is an onsite job, set traffic to null
+  // If this job is not an onsite job, set traffic to null
   const existingJob = jobs.find(j => j.ID === job.ID)
   if (existingJob && existingJob.Rate!.Category !== JOB_CATEGORY.OnSite) {
     const response: Response = await SaveJob({
@@ -117,7 +114,6 @@ const getAndUpdateJobTraffic = async (
 
   jobs = jobs.filter(j => j.Rate!.Category === JOB_CATEGORY.OnSite)
     .sort((a,b)=>Date.parse(a.StartAt) - Date.parse(b.StartAt));
-  console.log(jobs)
 
   for (let i = 0; i < jobs.length; i++) {
     let traffic: CalculateRouteSummary | undefined = undefined;
@@ -144,54 +140,6 @@ const getAndUpdateJobTraffic = async (
   }
 
   return result;
-
-
-
-  // const index = jobs.findIndex(j => j.ID === job.ID);
-  // console.log(index)
-  // if (index === -1 ) return;
-
-  // const laterJobs = jobs.slice(0, index);
-  // const earlierJobs = jobs.slice(index + 1);
-  // console.log(earlierJobs)
-  // console.log(laterJobs)
-  // if (laterJobs.length > 0 && laterJobs[index - 1].Location) {
-  //   const traffic = await calculateDistance(job.Location, laterJobs[index - 1].Location!);
-
-  //   const newJob: Job = {
-  //     ...laterJobs[index - 1],
-  //     Traffic: JSON.stringify(traffic) 
-  //   };
-
-  //   response = await SaveJob(newJob);
-
-  //   if (response.Status !== 'success') {
-  //     console.error(response.Status);
-  //   }
-  // }
-
-  // if (earlierJobs.length === 0 || !earlierJobs[0].Location) {
-  //   return { traffic: 'NoPreviousJobs', updatedJob: undefined }
-  // }
-
-  // const traffic = await calculateDistance(earlierJobs[0].Location, job.Location);
-
-
-  // const newJob: Job = {
-  //   ...job,
-  //   Traffic: JSON.stringify(traffic) 
-  // };
-
-  // response = await SaveJob(newJob);
-
-  // if (response.Status !== 'success') {
-  //   console.error(response.Status);
-  // }
-
-  // return { 
-  //   traffic: traffic,
-  //   updatedJob: response.Result as Job
-  // }
 }
 
 export {

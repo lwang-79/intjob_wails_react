@@ -238,13 +238,12 @@ function JobsPanel() {
             hasArrow
             label='Search date range: 2023-05-12,2023-05-20'
           >
-            <Box>
+            <Box display='flex'>
               <Icon as={MdDateRange} boxSize={6} />
             </Box>
           </Tooltip>
           <Input
             size='sm'
-            rounded='lg'
             placeholder='Input date to search. Format: 2023-05-12'
             onChange= {(event) => setSearchDate(event.target.value)}
             w='300px'

@@ -92,7 +92,7 @@ function JobCard({ job, onFinishCallBack, closeCallBack }: JobCardProps) {
               <Text>{new Date(job.StartAt).toLocaleString('sv-SE')}</Text>
             </HStack>
             <HStack w='full' spacing={4}>
-              <Text w='25%'>Rate:</Text>
+              <Text minW='25%'>Rate:</Text>
               <Text>{job.Rate?.Name}</Text>
             </HStack>
             <HStack w='full' spacing={4}>
@@ -105,7 +105,7 @@ function JobCard({ job, onFinishCallBack, closeCallBack }: JobCardProps) {
             </HStack>
             {job.Comments &&
               <HStack w='full' spacing={4} align='flex-start'>
-                <Text w='25%'>Comments:</Text>
+                <Text minW='25%'>Comments:</Text>
                 <Text>{job.Comments}</Text>
               </HStack>
             }

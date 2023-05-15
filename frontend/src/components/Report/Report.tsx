@@ -1,4 +1,5 @@
 import { 
+  Box,
   Button, 
   Divider, 
   HStack, 
@@ -25,7 +26,7 @@ import {
   useDisclosure
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { Job, Response } from "../../types/models";
+import { JOB_CATEGORY, Job, Response } from "../../types/models";
 import { GetJobsByDate } from "../../../wailsjs/go/main/App";
 import { CalculateRouteSummary } from "@aws-sdk/client-location";
 
@@ -44,6 +45,12 @@ interface SubReport {
   minutes: number;
   income: number;
   trafficInKm: number;
+}
+
+interface Claim {
+  departure: Job;
+  destination: Job;
+  distance: number;
 }
 
 function Report() {
@@ -90,8 +97,11 @@ function Report() {
     lastFiveFinancialYears.push([startTime, endTime]);
   }
 
+  const [ claims, setClaims ] = useState<Claim[]>([]);
+
   useEffect(() => {
     makeReport(startTime, endTime);
+    makeTrafficClaimList(startTime, endTime);
   }, []);
 
   const makeReport = async (startTime: Date, endTime: Date) => {
@@ -186,6 +196,42 @@ function Report() {
     setReport(report);
   }
 
+  const makeTrafficClaimList = async (startTime: Date, endTime: Date) => {
+    const response: Response = await GetJobsByDate(
+      startTime.toISOString().replace('.000',''), 
+      endTime.toISOString().replace('.000','')
+    );
+
+    if (response.Status !== 'success') {
+      console.error(response.Status);
+      return;
+    }
+
+    let jobs: Job[] = response.Result;
+    jobs = jobs.filter(job => job.Rate!.Category === JOB_CATEGORY.OnSite)
+      .sort((a,b) => Date.parse(a.StartAt) - Date.parse(b.StartAt));
+
+    const claims: Claim[] = [];
+
+    for (let i = 1; i < jobs.length; i++) {
+      if (!jobs[i].Traffic) continue;
+
+      const traffic = JSON.parse(jobs[i].Traffic!) as CalculateRouteSummary;
+      const distance = traffic.Distance ?? 0;
+
+      if (distance < 1) continue;
+
+      const claim: Claim = {
+        departure: jobs[i-1],
+        destination: jobs[i],
+        distance: distance,
+      }
+      claims.push(claim);      
+    } 
+
+    setClaims(claims);
+  }
+
   const calculateTax = (income: number) => {
     let tax = 0;
     if (income > 18200) {
@@ -208,10 +254,11 @@ function Report() {
   }
 
   const changeDate = (dates: [Date, Date]) => {
+    onCloseDatePicker();
     setStartTime(dates[0]);
     setEndTime(dates[1]);
     makeReport(dates[0], dates[1]);
-    onCloseDatePicker();
+    makeTrafficClaimList(dates[0], dates[1]);
   }
     
   
@@ -299,6 +346,31 @@ function Report() {
           </Tbody>
         </Table>
       </TableContainer>
+
+      {claims.length > 0 && 
+        <VStack w='full' spacing={4}>
+          <Text>Traffic Claims</Text>
+          {claims.map((claim, index) => (
+            <VStack key={index} w='full' align='flex-start' >
+              <Divider />
+              <VStack w='full' align='flex-start' spacing={0} px={4}>
+                <VStack align='flex-start' spacing={0}>
+                  <Text fontSize='sm'>{claim.departure.Address}</Text>
+                  <Text fontSize='sm'>{new Date(claim.departure.StartAt).toLocaleString('sv-SE')} - {claim.departure.Agent!.Name} - {claim.departure.Industry!.Name} - #{claim.departure.ID}</Text>
+                </VStack>
+                <VStack align='flex-end' spacing={0} w='full'>
+                  <Text fontSize='sm'>{claim.destination.Address}</Text>
+                  <HStack w='full'>
+                    <Tag><Text fontSize='sm'>Claimable traffic: {claim.distance} km</Text></Tag>
+                    <Spacer />
+                    <Text fontSize='sm'>{new Date(claim.destination.StartAt).toLocaleString('sv-SE')} - {claim.destination.Agent!.Name} - {claim.destination.Industry!.Name} - #{claim.destination.ID}</Text>
+                  </HStack>
+                </VStack>
+              </VStack>
+            </VStack>
+          ))}
+        </VStack>
+      }
       
       <Modal
         isOpen={isOpenDatePicker}
