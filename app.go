@@ -87,8 +87,8 @@ func (a *App) SaveHoliday(holiday repository.Holiday) repository.Response {
 	return repository.SaveHoliday(holiday)
 }
 
-func (a *App) ListHolidays(lastDate string) repository.Response {
-	return repository.ListHolidays(lastDate)
+func (a *App) ListHolidays(lastDate string, limit int) repository.Response {
+	return repository.ListHolidays(lastDate, limit)
 }
 
 func (a *App) DeleteHoliday(holiday repository.Holiday) repository.Response {
@@ -117,6 +117,22 @@ func (a *App) GetJobsByFilter(filterName, filterValue string, lastDate string, l
 
 func (a *App) DeleteJob(job repository.Job) repository.Response {
 	return repository.DeleteJob(job)
+}
+
+func (a *App) GetLocationById(id uint) repository.Response {
+	return repository.GetLocationById(id)
+}
+
+func (a *App) SaveLocation(location repository.Location) repository.Response {
+	return repository.SaveLocation(location)
+}
+
+func (a *App) ListAllLocations() repository.Response {
+	return repository.ListAllLocations()
+}
+
+func (a *App) DeleteLocation(location repository.Location) repository.Response {
+	return repository.DeleteLocation(location)
 }
 
 func (a *App) GetCurrentDir() string {

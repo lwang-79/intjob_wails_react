@@ -31,7 +31,6 @@ export const searchPlaceIndex = async (text: string) => {
     };
     const command = new SearchPlaceIndexForSuggestionsCommand(input);
     const response = await client.send(command);
-    console.log(response);
     return response.Results  
   } catch (error) {
     console.error(error);
@@ -58,7 +57,6 @@ export const getPlace = async (placeId: string) => {
     };
     const command = new GetPlaceCommand(input);
     const response = await client.send(command);
-    console.log(response);
     if (response.Place) {
       return response.Place.Geometry?.Point
     }
@@ -96,7 +94,6 @@ export const calculateDistance = async (departure: string, destination: string) 
     };
     const command = new CalculateRouteCommand(input);
     const response = await client.send(command);
-    console.log(response);
     return response.Summary;
   } catch (error) {
     console.error(error);

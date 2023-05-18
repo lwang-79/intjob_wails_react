@@ -8,6 +8,7 @@ import AgentAndIndustryChart from './AgentAndIndustryChart';
 import IncomeLineChart from './IncomeLineChart';
 import JobStatusCard from './JobStatusCard';
 import HolidayCard from './HolidayCard';
+import LocationCard from './LocationCard';
 
 function Dashboard() {
   const { colorMode } = useColorMode();
@@ -89,6 +90,7 @@ function Dashboard() {
         <VStack maxW='xs' w='full' >
           <IncomeLineChart jobs={jobs}/>
           <JobStatusCard jobs={jobs}/>
+          <LocationCard />
           <HolidayCard />
         </VStack>
       </HStack>}

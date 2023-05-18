@@ -1,19 +1,33 @@
-import { Box, Button, Divider, HStack, Input, Progress, Radio, RadioGroup, Select, Spacer, Text, VStack, useColorModeValue, useToast } from "@chakra-ui/react";
-import { Agent, Industry, JOB_CATEGORY, JOB_STATUS, Job, Rate, Response } from "../../types/models"
+import { 
+  Box, 
+  Button, 
+  Divider, 
+  HStack, 
+  Icon,
+  IconButton, 
+  Input, 
+  Progress, 
+  Radio, 
+  RadioGroup, 
+  Select, 
+  Spacer, 
+  Text, 
+  Tooltip, 
+  VStack, 
+  useColorModeValue, 
+  useToast 
+} from "@chakra-ui/react";
+import { Agent, Industry, JOB_CATEGORY, JOB_STATUS, Job, Location, Rate, Response } from "../../types/models"
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { GetRatesByAgentTypeAndCategory, ListAllAgents, ListAllIndustries, SaveJob } from "../../../wailsjs/go/main/App";
+import { GetRatesByAgentTypeAndCategory, ListAllAgents, ListAllIndustries, ListAllLocations, SaveJob, SaveLocation } from "../../../wailsjs/go/main/App";
 import { calculateIncome, getAndUpdateJobTraffic, getJobType } from "../../types/job";
 import { getKeyByValue, jobTypeIcon } from "../../types/utils";
 import { getPlace, searchPlaceIndex } from "../../types/location";
+import { MdAdd } from "react-icons/md";
 
-interface SearchedPlace {
+export interface SearchedPlace {
   PlaceId: string
   Text: string
-}
-
-interface Location {
-  address: string
-  geometry: string
 }
 
 interface JobFormProps {
@@ -39,14 +53,17 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
     !isNew && job.AgentJobNumber ? job.AgentJobNumber : ''
   );
   const commentsRef = useRef<string>(!isNew && job.Comments ? job.Comments : '');
-  const [ placeOptions, setPlaceOptions ] = useState<SearchedPlace[]>([]);
+  const [ placeOptions, setPlaceOptions ] = useState<Location[]>([]);
   const [ selectedLocation, setSelectedLocation ] = useState<Location>(job ? {
-    address: job.Address?? '',
-    geometry: job.Location?? ''
+    Address: job.Address?? '',
+    Geometry: job.Location?? '',
+    PlaceId: ''
   } : {
-    address: '',
-    geometry: ''
+    Address: '',
+    Geometry: '',
+    PlaceId: ''
   });
+  const [ favoriteLocations, setFavoriteLocations ] = useState<Location[]>([]);
 
   const [ isFirstRender, setIsFirstRender ] = useState<boolean>(true);
   const toast = useToast();
@@ -99,6 +116,7 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
     const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
     const adjustedTop = inputRect.bottom - modalRect.top + scrollTop;
     const adjustedLeft = inputRect.left - modalRect.left + scrollLeft;
+
     setAutoCompleteWidth(inputRect.width);
     setBoxPosition({ top: adjustedTop, left: adjustedLeft });
   }, [placeOptions.length === 0]);
@@ -191,6 +209,15 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
       setSelectedRate(rates[0]);
       setIncome(calculateIncome(formState, rates[0]));
     }
+
+    response = await ListAllLocations();
+    if (response.Status !== 'success') {
+      console.error(response.Status);
+      return;
+    }
+
+    const locations = response.Result as Location[];
+    setFavoriteLocations(locations);
   }
 
   const getAndUpdateRates = async (agents: Agent[]): Promise<Rate[]> => {
@@ -214,7 +241,6 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
   }
 
   const setInput = (key: string) => (event: any) => {
-    console.log(event.target.value)
     let value = event.target.value;
     if (!['StartAt', 'CancelAt', 'AgentJobNumber', 'Comments'].includes(key)) {
       value = Number(value);
@@ -247,21 +273,33 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
   const timeoutRef = useRef<number|undefined>();
   const searchPlaces = async (keyWord: string) => {
 
+    if (!keyWord) {
+      setPlaceOptions(favoriteLocations);
+      return;
+    }
+
     clearTimeout(timeoutRef.current);
     
     timeoutRef.current = setTimeout(async () => {
-      const options = await searchPlaceIndex(keyWord) as SearchedPlace[];
-
+      const searchedPlaces = await searchPlaceIndex(keyWord) as SearchedPlace[];
+      const options = searchedPlaces.map(({ PlaceId, Text }) => ({PlaceId: PlaceId, Address: Text, Geometry: '' }));
       setPlaceOptions(options);
-    }, 1000);
+    }, 800);
+
   }
 
-  const locationSelectedHandler = async (place: SearchedPlace) => {
+  const locationSelectedHandler = async (place: Location) => {
+    clearTimeout(timeoutRef.current);
     setPlaceOptions([]);
+
+    if (place.Geometry) {
+      setSelectedLocation(place);
+      return;
+    }
 
     setSelectedLocation({
       ...selectedLocation,
-      address: place.Text,
+      Address: place.Address,
     });
 
     const geometry = await getPlace(place.PlaceId);
@@ -277,10 +315,66 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
     }
 
     setSelectedLocation({
-      address: place.Text,
-      geometry: JSON.stringify(geometry)
+      PlaceId: place.PlaceId,
+      Address: place.Address,
+      Geometry: JSON.stringify(geometry)
     });
 
+  }
+
+  const hasBeenFocused = useRef(false);
+  const locationOnFocusHandler = () => {
+    hasBeenFocused.current = true;
+    if (selectedLocation.Address){
+      return;
+    }
+
+    setPlaceOptions(favoriteLocations);
+  }
+
+  const locationOnBlurHandler = () => {
+    hasBeenFocused.current = false;
+    if (selectedLocation.Address){
+      return;
+    }
+
+    timeoutRef.current = setTimeout(()=>{
+      setPlaceOptions([]);
+    },200);
+  }
+
+  const addFavoriteLocation = async () => {
+    if (favoriteLocations.length >= 10) {
+      toast({
+        description: 'Max allowed favorite location is 10, please remove some before add a new one.',
+        status: 'error',
+        duration: 8000,
+        isClosable: true,
+        position: 'top'
+      });
+      return;
+    }
+
+    const response: Response = await SaveLocation(selectedLocation);
+
+    if (response.Status !== 'success') {
+      console.error(response.Status);
+      toast({
+        description: 'Failed to save the location, please contact the administrator.',
+        status: 'error',
+        duration: 8000,
+        isClosable: true,
+        position: 'top'
+      });
+    } else {
+      setFavoriteLocations([...favoriteLocations, selectedLocation]);
+      toast({
+        description: 'Location saved successfully.',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
   }
 
   const submit = async (button: string) => {
@@ -303,8 +397,8 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
       Comments: commentsRef.current,
       Status : button === 'Complete' ? JOB_STATUS.Completed : 
         button === 'Book' ? JOB_STATUS.Booked : formState.Status,
-      Address: selectedLocation.address?? undefined,
-      Location: selectedLocation.geometry?? undefined
+      Address: selectedLocation.Address?? undefined,
+      Location: selectedLocation.Geometry?? undefined
     }
 
     const response: Response = await SaveJob(newJob);
@@ -435,30 +529,47 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
           <HStack w='full' spacing={4}>
             <Spacer />
             <Text>Location:</Text>
-            <Input 
-              ref={autoCompleteRef}
-              w='70%'
-              value={selectedLocation?.address}
-              placeholder='Search location'
-              rounded={0}
-              onChange={(e)=>{
-                setSelectedLocation({ address: e.target.value, geometry: '' });
-                searchPlaces(e.target.value);
-              }}
-              isDisabled={selectedCategory!==JOB_CATEGORY.OnSite}
-            />
+            <HStack w='70%' spacing={0} ref={autoCompleteRef}>
+              <Input 
+                value={selectedLocation?.Address}
+                placeholder='Search location'
+                rounded={0}
+                onChange={(e)=>{
+                  setSelectedLocation({ PlaceId: '', Address: e.target.value, Geometry: '' });
+                  searchPlaces(e.target.value);
+                }}
+                onFocus={locationOnFocusHandler}
+                onBlur={locationOnBlurHandler}
+                isDisabled={selectedCategory!==JOB_CATEGORY.OnSite}
+              />
+              <Tooltip
+                label='Add Favorite Location'
+                hasArrow
+              >
+                <Box>
+                  <IconButton
+                    aria-label='Add Address'
+                    size='sm'
+                    rounded='full'
+                    variant='ghost'
+                    icon={<Icon as={MdAdd} boxSize={6} />}
+                    onClick={addFavoriteLocation}
+                    isDisabled={selectedLocation.Geometry? false : true}
+                  />
+                </Box>
+              </Tooltip>
+            </HStack>
+            
           </HStack>
 
           {placeOptions.length > 0 &&
             <Box
               position='absolute'
               zIndex={100}
-              top={boxPosition.top}
-              left={boxPosition.left}
+              top={`${boxPosition.top}px`}
+              left={`${boxPosition.left}px`}
               w={autoCompleteWidth}
               p={2}
-              border={3}
-              borderColor='red'
               bgColor={useColorModeValue('gray.50', 'gray.800')}
             >
               <VStack 
@@ -472,16 +583,16 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
                     fontSize='xs'
                     whiteSpace='nowrap'
                     overflow="hidden"
-                    textOverflow="ellipsis"
                     w='full'
                     _hover={{
                       cursor: 'pointer',
                       whiteSpace: 'normal',
-                      color: fontColor
+                      color: fontColor,
+                      fontWeight: 'bold',
                     }}
                     onClick={()=>locationSelectedHandler(place)}
                   >
-                    {place.Text}
+                    {place.Address}
                   </Text>
                 ))}
               </VStack>
@@ -625,6 +736,8 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
           </Button>
         </HStack>
       </VStack>
+
+
     </>
   )
 }

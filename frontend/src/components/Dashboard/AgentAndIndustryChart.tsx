@@ -23,7 +23,7 @@ const monthNames = [
 
 function AgentAndIndustryChart({ jobs }: { jobs: Job[] }) {
   const [ options, setOptions ] = useState<any>(); 
-  const [ category, setCategory ] = useState('Agent');
+  const [ category, setCategory ] = useState('Industry');
   const [ shouldRender, setShouldRender ] = useBoolean(true);
   const today = new Date();
   const startDateRef = useRef<Date>(new Date(today.getFullYear(), today.getMonth() - 4, 1));

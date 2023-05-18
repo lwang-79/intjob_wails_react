@@ -30,6 +30,7 @@ import {
   MdPerson,
   MdTranslate, 
 } from 'react-icons/md';
+import { TbDatabase } from "react-icons/tb";
 import Support from './Support';
 import { PAGES } from '../../types/hub';
 
@@ -106,6 +107,12 @@ export default function Header({ hubSwitch }: HeaderProps) {
                     <HStack justifyContent={'center'}>
                       <Icon as={MdPerson} boxSize={6} color='gray.400' />
                       <span>Account</span>
+                    </HStack>
+                  </MenuItem>
+                  <MenuItem onClick={() => hubSwitch(PAGES.Database)}>
+                    <HStack justifyContent={'center'}>
+                      <Icon as={TbDatabase} boxSize={6} color='gray.400' />
+                      <span>Manage Data</span>
                     </HStack>
                   </MenuItem>
                   <MenuItem onClick={toggleColorMode}>

@@ -2,18 +2,21 @@ export type ShowStatus = {
   dashboard: boolean;
   jobsPanel: boolean;
   report: boolean;
+  database: boolean;
 }
 
 export const PAGES = {
   Dashboard: 'dashboard',
   JobsPanel: 'jobsPanel',
   Report: 'report',
+  Database: 'database',
 }
 
 export const DEFAULT_SHOW_STATUS: ShowStatus = {
   dashboard: true,
   jobsPanel: false,
-  report: false
+  report: false,
+  database: false,
 }
 
 export const changeStatus = (

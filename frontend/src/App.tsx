@@ -7,6 +7,7 @@ import { DEFAULT_SHOW_STATUS, PAGES, changeStatus } from "./types/hub"
 import { useState } from "react"
 import JobsPanel from "./components/Job/JobsPanel"
 import Report from "./components/Report/Report"
+import DatabaseManagement from "./components/DatabaseManagement/DatabaseManagement"
 
 function App() {
 
@@ -24,7 +25,7 @@ function App() {
         {showStatus.dashboard && <Dashboard />}
         {showStatus.jobsPanel && <JobsPanel />}
         {showStatus.report && <Report />}
-
+        {showStatus.database && <DatabaseManagement />}
       </VStack>
       <Footer />
     </ChakraProvider>

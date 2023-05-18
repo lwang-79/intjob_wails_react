@@ -1,23 +1,32 @@
-import { Button, Card, Divider, HStack, Spacer, Text, VStack } from "@chakra-ui/react"
+import { Button, Card, Divider, HStack, Modal, ModalCloseButton, ModalContent, ModalOverlay, Spacer, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { useEffect, useState } from "react"
 import { Holiday, Response } from "../../types/models"
 import { ListHolidays } from "../../../wailsjs/go/main/App";
+import HolidayUpdate from "../DatabaseManagement/HolidayUpdate";
 
 function HolidayCard() {
 
-  const [holidays, setHolidays] = useState<Holiday[]>([]);
+  const [ holidays, setHolidays ] = useState<Holiday[]>([]);
+  const [ lastHoliday, setLastHoliday ] = useState<Holiday>();
+  const { 
+    isOpen: isOpenFetch, 
+    onOpen: onOpenFetch, 
+    onClose: onCloseFetch
+  } = useDisclosure();
+
   useEffect(() => {
     getAndSetHolidays();
   }, []);
 
   const getAndSetHolidays = async () => {
-    const response: Response = await ListHolidays('');
+    const response: Response = await ListHolidays('', 50);
     if (response.Status !== 'success') {
       console.error(response.Status);
       return;
     }
 
     const holidays = response.Result as Holiday[];
+    setLastHoliday(holidays[0]);
 
     const today = new Date();
     const filteredHolidays = holidays.filter(holiday => 
@@ -35,6 +44,7 @@ function HolidayCard() {
   
   // console.log(holidays)  
   return (
+    <>
     <Card w='full'>
       <VStack p={4} align='flex-start'>
         <Text>🏖️ Upcoming Public Holidays</Text>
@@ -48,10 +58,26 @@ function HolidayCard() {
         ))}
       </VStack>
       <Button
+        onClick={onOpenFetch}
       >
-        Manage holidays
+        Update holidays
       </Button>
     </Card>
+    
+    <Modal
+      isOpen={isOpenFetch}
+      onClose={onCloseFetch}
+      closeOnOverlayClick={false}
+    >
+      <ModalOverlay />
+      <ModalContent>
+        <ModalCloseButton  />
+        {lastHoliday && 
+          <HolidayUpdate lastHolidayDate={lastHoliday.Date} onFinish={getAndSetHolidays}/>
+        }
+      </ModalContent>
+    </Modal>
+    </>
   )
 }
 

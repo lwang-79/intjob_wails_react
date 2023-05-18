@@ -29,7 +29,7 @@ func GetHolidayByDate(date string) Response {
 	return Response{Result: holiday, Status: successOrError(err)}
 }
 
-func ListHolidays(lastDate string) Response {
+func ListHolidays(lastDate string, limit int) Response {
 	db := openDatabase()
 
 	if lastDate == "" {
@@ -40,6 +40,7 @@ func ListHolidays(lastDate string) Response {
 	err := db.Limit(100).
 		Order("date desc").
 		Where("date < ?", lastDate).
+		Limit(limit).
 		Find(&holidays).Error
 
 	closeDatabase(db)

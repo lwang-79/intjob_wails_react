@@ -18,6 +18,10 @@ export function DeleteJob(arg1) {
   return window['go']['main']['App']['DeleteJob'](arg1);
 }
 
+export function DeleteLocation(arg1) {
+  return window['go']['main']['App']['DeleteLocation'](arg1);
+}
+
 export function DeleteRate(arg1) {
   return window['go']['main']['App']['DeleteRate'](arg1);
 }
@@ -54,6 +58,10 @@ export function GetJobsByFilter(arg1, arg2, arg3, arg4) {
   return window['go']['main']['App']['GetJobsByFilter'](arg1, arg2, arg3, arg4);
 }
 
+export function GetLocationById(arg1) {
+  return window['go']['main']['App']['GetLocationById'](arg1);
+}
+
 export function GetRateById(arg1) {
   return window['go']['main']['App']['GetRateById'](arg1);
 }
@@ -70,12 +78,16 @@ export function ListAllIndustries() {
   return window['go']['main']['App']['ListAllIndustries']();
 }
 
+export function ListAllLocations() {
+  return window['go']['main']['App']['ListAllLocations']();
+}
+
 export function ListAllRates() {
   return window['go']['main']['App']['ListAllRates']();
 }
 
-export function ListHolidays(arg1) {
-  return window['go']['main']['App']['ListHolidays'](arg1);
+export function ListHolidays(arg1, arg2) {
+  return window['go']['main']['App']['ListHolidays'](arg1, arg2);
 }
 
 export function ListJobs(arg1, arg2, arg3) {
@@ -96,6 +108,10 @@ export function SaveIndustry(arg1) {
 
 export function SaveJob(arg1) {
   return window['go']['main']['App']['SaveJob'](arg1);
+}
+
+export function SaveLocation(arg1) {
+  return window['go']['main']['App']['SaveLocation'](arg1);
 }
 
 export function SaveRate(arg1) {

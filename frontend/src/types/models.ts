@@ -29,7 +29,7 @@ export type Rate = {
 	DeductTime: number
 	Comments: string
 	AgentID: number
-	Agent: Agent
+	Agent?: Agent
 	Type: number
 	Category: number
 	Expired: boolean
@@ -59,6 +59,13 @@ export type Job = {
 	Address?: string
 	Location?: string
 	Traffic?: string
+}
+
+export type Location = {
+	ID?: number
+	PlaceId: string
+	Address: string
+	Geometry: string
 }
 
 export type Response = {

@@ -109,7 +109,7 @@ function JobsPanel() {
 
   const loadMoreJobs = async () => {
     let lastDate = allJobsRef.current[allJobsRef.current.length - 1].StartAt;
-    if (lastDate < '2023-05-01') {
+    if (lastDate < '2023-05-14') {
       lastDate = lastDate.replace('T', ' ').replace('Z', '');
     }
 
@@ -192,9 +192,7 @@ function JobsPanel() {
   }
 
   const jobChangedHandler = (job: Job, type: 'add' | 'update' | 'delete') => {
-    console.log(job, type)
     allJobsRef.current = changeArrayByItem([...allJobsRef.current], job, type);
-    console.log(allJobsRef.current);
     setJobs(allJobsRef.current);
   }
 
