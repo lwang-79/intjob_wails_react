@@ -10,6 +10,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 )
 
+//go:embed all:frontend/dist
 var assets embed.FS
 
 func main() {
@@ -20,9 +21,10 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:  "IntJob",
-		Width:  1500,
-		Height: 1000,
+		Title: "IntJob",
+		// Width:      1500,
+		// Height:     1000,
+		Fullscreen: true,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
