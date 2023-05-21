@@ -21,10 +21,10 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title: "IntJob",
-		// Width:      1500,
-		// Height:     1000,
-		Fullscreen: true,
+		Title:            "IntJob",
+		Width:            1024,
+		Height:           768,
+		WindowStartState: 1,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
