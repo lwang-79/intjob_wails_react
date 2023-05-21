@@ -6,64 +6,44 @@ type Holiday struct {
 	Name string
 }
 
-func GetHolidayById(id uint) Response {
-	db := openDatabase()
-
+func (r *Repo) GetHolidayById(id uint) Response {
 	holiday := Holiday{ID: id}
-	err := db.First(&holiday, id).Error
-
-	closeDatabase(db)
-
+	err := r.db.First(&holiday, id).Error
 	return Response{Result: holiday, Status: successOrError(err)}
 }
 
-func GetHolidayByDate(date string) Response {
-	db := openDatabase()
-
+func (r *Repo) GetHolidayByDate(date string) Response {
 	var holiday Holiday
-	err := db.Limit(100).
+
+	err := r.db.Limit(100).
 		Where("date = ?", date).
 		First(&holiday).Error
 
-	closeDatabase(db)
 	return Response{Result: holiday, Status: successOrError(err)}
 }
 
-func ListHolidays(lastDate string, limit int) Response {
-	db := openDatabase()
-
+func (r *Repo) ListHolidays(lastDate string, limit int) Response {
 	if lastDate == "" {
 		lastDate = "9999-12-31 23:59:59"
 	}
 
 	var holidays []Holiday
-	err := db.Limit(100).
+
+	err := r.db.Limit(100).
 		Order("date desc").
 		Where("date < ?", lastDate).
 		Limit(limit).
 		Find(&holidays).Error
 
-	closeDatabase(db)
-
 	return Response{Result: holidays, Status: successOrError(err)}
 }
 
-func SaveHoliday(holiday Holiday) Response {
-	db := openDatabase()
-
-	err := db.Save(&holiday).Error
-
-	closeDatabase(db)
-
+func (r *Repo) SaveHoliday(holiday Holiday) Response {
+	err := r.db.Save(&holiday).Error
 	return Response{Result: holiday, Status: successOrError(err)}
 }
 
-func DeleteHoliday(holiday Holiday) Response {
-	db := openDatabase()
-
-	err := db.Delete(&holiday).Error
-
-	closeDatabase(db)
-
+func (r *Repo) DeleteHoliday(holiday Holiday) Response {
+	err := r.db.Delete(&holiday).Error
 	return Response{Result: "", Status: successOrError(err)}
 }

@@ -4,6 +4,8 @@ import (
 	// "os"
 	// "path/filepath"
 
+	"context"
+
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -13,23 +15,41 @@ type Response struct {
 	Status string
 }
 
-func openDatabase() *gorm.DB {
-	// ex, err := os.Executable()
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// exPath := filepath.Dir(ex)
+type Repo struct {
+	db *gorm.DB
+}
 
-	// println(exPath)
-	// db, err := gorm.Open(sqlite.Open(exPath+"/intjob.db"), &gorm.Config{})
-
-	db, err := gorm.Open(sqlite.Open("intjob.db"), &gorm.Config{})
-
+func NewRepo(path string) *Repo {
+	db, err := gorm.Open(sqlite.Open(path), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}
 
-	return db
+	return &Repo{db: db}
+}
+
+// func openDatabase() *gorm.DB {
+// 	// ex, err := os.Executable()
+// 	// if err != nil {
+// 	// 	panic(err)
+// 	// }
+// 	// exPath := filepath.Dir(ex)
+
+// 	// println(exPath)
+// 	// db, err := gorm.Open(sqlite.Open(exPath+"/intjob.db"), &gorm.Config{})
+
+// 	db, err := gorm.Open(sqlite.Open("intjob.db"), &gorm.Config{})
+
+// 	if err != nil {
+// 		panic("failed to connect database")
+// 	}
+
+// 	return db
+// }
+
+func (r *Repo) Shutdown(ctx context.Context) {
+	sqlDB, _ := r.db.DB()
+	sqlDB.Close()
 }
 
 func closeDatabase(db *gorm.DB) {

@@ -1,4 +1,4 @@
-import { SaveHoliday } from "../../wailsjs/go/main/App";
+import { SaveHoliday } from "../../wailsjs/go/repository/Repo";
 import { Holiday } from "./models";
 
 interface APIReturnedHoliday {

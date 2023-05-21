@@ -27,7 +27,7 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { JOB_CATEGORY, Job, Response } from "../../types/models";
-import { GetJobsByDate } from "../../../wailsjs/go/main/App";
+import { GetJobsByDate } from "../../../wailsjs/go/repository/Repo";
 import { CalculateRouteSummary } from "@aws-sdk/client-location";
 
 interface Report {

@@ -91,6 +91,7 @@ function GenericForm ({ initialValues, fields, onSubmit }: GenericFormProps) {
                   value={values[field.name] || ''}
                   onChange={handleChange}
                   placeholder={field.placeholder}
+                  rounded={0}
                 >
                   {field.options!.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -105,6 +106,7 @@ function GenericForm ({ initialValues, fields, onSubmit }: GenericFormProps) {
                   value={values[field.name] || ''}
                   onChange={handleChange}
                   placeholder={field.placeholder}
+                  rounded={0}
                 />
               )}
               <FormErrorMessage>{errors[field.name as keyof typeof errors]}</FormErrorMessage>

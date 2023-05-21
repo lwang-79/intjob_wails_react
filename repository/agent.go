@@ -11,44 +11,24 @@ type Agent struct {
 	BusinessHourEnd   string
 }
 
-func GetAgentById(id uint) Response {
-	db := openDatabase()
-
+func (r *Repo) GetAgentById(id uint) Response {
 	agent := Agent{ID: id}
-	err := db.First(&agent, id).Error
-
-	closeDatabase(db)
-
+	err := r.db.First(&agent, id).Error
 	return Response{Result: agent, Status: successOrError(err)}
 }
 
-func ListAllAgents() Response {
-	db := openDatabase()
-
+func (r *Repo) ListAllAgents() Response {
 	var agents []Agent
-	err := db.Find(&agents).Error
-
-	closeDatabase(db)
-
+	err := r.db.Find(&agents).Error
 	return Response{Result: agents, Status: successOrError(err)}
 }
 
-func SaveAgent(agent Agent) Response {
-	db := openDatabase()
-
-	err := db.Save(&agent).Error
-
-	closeDatabase(db)
-
+func (r *Repo) SaveAgent(agent Agent) Response {
+	err := r.db.Save(&agent).Error
 	return Response{Result: agent, Status: successOrError(err)}
 }
 
-func DeleteAgent(agent Agent) Response {
-	db := openDatabase()
-
-	err := db.Delete(&agent).Error
-
-	closeDatabase(db)
-
+func (r *Repo) DeleteAgent(agent Agent) Response {
+	err := r.db.Delete(&agent).Error
 	return Response{Result: "", Status: successOrError(err)}
 }

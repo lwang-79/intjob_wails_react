@@ -9,7 +9,6 @@ import {
   IconButton, 
   Input, 
   Modal, 
-  ModalBody, 
   ModalCloseButton, 
   ModalContent, 
   ModalOverlay, 
@@ -25,7 +24,7 @@ import {
 } from "@chakra-ui/react"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { Location, Response } from "../../types/models";
-import { DeleteLocation, ListAllLocations, SaveLocation } from "../../../wailsjs/go/main/App";
+import { DeleteLocation, ListAllLocations, SaveLocation } from "../../../wailsjs/go/repository/Repo";
 import { MdAdd } from "react-icons/md";
 import { getPlace, searchPlaceIndex } from "../../types/location";
 import { SearchedPlace } from "../Forms/JobForm";
@@ -51,8 +50,15 @@ function LocationCard() {
   const fontColor = useColorModeValue('gray.900', 'gray.50');
   const [ placeOptions, setPlaceOptions ] = useState<Location[]>([]);
   const [ selectedLocation, setSelectedLocation ] = useState<Location>(initLocation);
+  const optionColor = useColorModeValue('gray.50', 'gray.800');
+  const [ isFirstRender, setIsFirstRender ] = useState<boolean>(true);
 
   useLayoutEffect(() => {
+    if (isFirstRender) {
+      setIsFirstRender(false);
+      return;
+    }
+
     const inputElement = autoCompleteRef.current;
     if (!inputElement) {
       console.log('No input element');
@@ -194,10 +200,10 @@ function LocationCard() {
   return (
     <>
       <Card w='full'>
-        <VStack p={4} align='flex-start'>
-          <Text>📍 Favorite Locations</Text>
+        <VStack align='flex-start'>
+          <Text px={4} pt={4}>📍 Favorite Locations</Text>
           <Divider />
-          <VStack w='full'>
+          <VStack w='full' px={4} pb={4}>
             <Text as='b' fontSize='2xl'>{locations.length}</Text>
             <Text fontSize='sm'>Total allowed 10</Text>
           </VStack>
@@ -259,7 +265,7 @@ function LocationCard() {
                   left={`${boxPosition.left}px`}
                   w={autoCompleteWidth}
                   p={2}
-                  bgColor={useColorModeValue('gray.50', 'gray.800')}
+                  bgColor={optionColor}
                 >
                   <VStack 
                     spacing={1}

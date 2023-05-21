@@ -21,56 +21,32 @@ type Rate struct {
 	Expired         bool
 }
 
-func GetRateById(id uint) Response {
-	db := openDatabase()
-
+func (r *Repo) GetRateById(id uint) Response {
 	rate := Rate{ID: id}
-	err := db.Preload("Agent").First(&rate, id).Error
-
-	closeDatabase(db)
-
+	err := r.db.Preload("Agent").First(&rate, id).Error
 	return Response{Result: rate, Status: successOrError(err)}
 }
 
-func GetRatesByAgentTypeAndCategory(agentId uint, typeId int, categoryId int) Response {
-	db := openDatabase()
+func (r *Repo) GetRatesByAgentTypeAndCategory(agentId uint, typeId int, categoryId int) Response {
 	var rates []Rate
-	err := db.Preload("Agent").
+	err := r.db.Preload("Agent").
 		Where("agent_id = ? and type = ? and category = ?", agentId, typeId, categoryId).
 		Find(&rates).Error
-
-	closeDatabase(db)
-
 	return Response{Result: rates, Status: successOrError(err)}
 }
 
-func ListAllRates() Response {
-	db := openDatabase()
-
+func (r *Repo) ListAllRates() Response {
 	var rates []Rate
-	err := db.Preload("Agent").Find(&rates).Error
-
-	closeDatabase(db)
-
+	err := r.db.Preload("Agent").Find(&rates).Error
 	return Response{Result: rates, Status: successOrError(err)}
 }
 
-func SaveRate(rate Rate) Response {
-	db := openDatabase()
-
-	err := db.Save(&rate).Error
-
-	closeDatabase(db)
-
+func (r *Repo) SaveRate(rate Rate) Response {
+	err := r.db.Save(&rate).Error
 	return Response{Result: rate, Status: successOrError(err)}
 }
 
-func DeleteRate(rate Rate) Response {
-	db := openDatabase()
-
-	err := db.Delete(&rate).Error
-
-	closeDatabase(db)
-
+func (r *Repo) DeleteRate(rate Rate) Response {
+	err := r.db.Delete(&rate).Error
 	return Response{Result: "", Status: successOrError(err)}
 }

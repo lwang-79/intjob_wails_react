@@ -1,4 +1,3 @@
-import { ListAllAgents } from "../../wailsjs/go/main/App";
 import { JOB_STATUS, Job } from "./models";
 import { getWeekNumber, splitNumbers } from "./utils";
 

@@ -7,44 +7,24 @@ type Location struct {
 	Geometry string
 }
 
-func GetLocationById(id uint) Response {
-	db := openDatabase()
-
+func (r *Repo) GetLocationById(id uint) Response {
 	location := Location{ID: id}
-	err := db.First(&location, id).Error
-
-	closeDatabase(db)
-
+	err := r.db.First(&location, id).Error
 	return Response{Result: location, Status: successOrError(err)}
 }
 
-func ListAllLocations() Response {
-	db := openDatabase()
-
+func (r *Repo) ListAllLocations() Response {
 	var locations []Location
-	err := db.Find(&locations).Error
-
-	closeDatabase(db)
-
+	err := r.db.Find(&locations).Error
 	return Response{Result: locations, Status: successOrError(err)}
 }
 
-func SaveLocation(location Location) Response {
-	db := openDatabase()
-
-	err := db.Save(&location).Error
-
-	closeDatabase(db)
-
+func (r *Repo) SaveLocation(location Location) Response {
+	err := r.db.Save(&location).Error
 	return Response{Result: location, Status: successOrError(err)}
 }
 
-func DeleteLocation(location Location) Response {
-	db := openDatabase()
-
-	err := db.Delete(&location).Error
-
-	closeDatabase(db)
-
+func (r *Repo) DeleteLocation(location Location) Response {
+	err := r.db.Delete(&location).Error
 	return Response{Result: "", Status: successOrError(err)}
 }

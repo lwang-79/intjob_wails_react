@@ -1,0 +1,16 @@
+{
+ "DBPath": "intjob.db",
+ "LocationService": {
+  "Region": "ap-southeast-2",
+  "IndexName": "HereIndex",
+  "CalculatorName": "HereCalculator",
+  "IdentityPoolID": "ap-southeast-2:c65f490d-31b7-46fe-94d8-fbdb071fe994",
+  "FilterCountries": [
+   "AUS"
+  ],
+  "HomeGeometry": [
+   145.2449,
+   -37.87961
+  ]
+ }
+}

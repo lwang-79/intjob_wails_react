@@ -1,7 +1,7 @@
 import { Button, Card, Divider, HStack, Modal, ModalCloseButton, ModalContent, ModalOverlay, Spacer, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { useEffect, useState } from "react"
 import { Holiday, Response } from "../../types/models"
-import { ListHolidays } from "../../../wailsjs/go/main/App";
+import { ListHolidays } from "../../../wailsjs/go/repository/Repo";
 import HolidayUpdate from "../DatabaseManagement/HolidayUpdate";
 
 function HolidayCard() {
@@ -46,9 +46,10 @@ function HolidayCard() {
   return (
     <>
     <Card w='full'>
-      <VStack p={4} align='flex-start'>
-        <Text>🏖️ Upcoming Public Holidays</Text>
+      <VStack align='flex-start'>
+        <Text px={4} pt={4}>🏖️ Upcoming Public Holidays</Text>
         <Divider />
+        <VStack px={4} pb={4} w='full'>
         {holidays.map((holiday, index) => (
           <HStack key={index} w='full'>
             <Text fontSize='sm'>{holiday.Date.slice(0,10)}</Text>
@@ -56,6 +57,7 @@ function HolidayCard() {
             <Text fontSize='sm'>{holiday.Name}</Text>
           </HStack>
         ))}
+        </VStack>
       </VStack>
       <Button
         onClick={onOpenFetch}

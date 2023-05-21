@@ -1,5 +1,5 @@
 import { CalculateRouteSummary } from "@aws-sdk/client-location";
-import { GetHolidayByDate, GetJobsByDate, SaveJob } from "../../wailsjs/go/main/App";
+import { GetHolidayByDate, GetJobsByDate, SaveJob } from "../../wailsjs/go/repository/Repo";
 import { calculateDistance } from "./location";
 import { Agent, Holiday, JOB_CATEGORY, JOB_STATUS, JOB_TYPE, Job, Rate, Response } from "./models";
 

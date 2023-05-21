@@ -8,6 +8,8 @@ import { useState } from "react"
 import JobsPanel from "./components/Job/JobsPanel"
 import Report from "./components/Report/Report"
 import DatabaseManagement from "./components/DatabaseManagement/DatabaseManagement"
+import SettingsPanel from "./components/Settings/Settings"
+import Help from "./components/Common/Help"
 
 function App() {
 
@@ -26,6 +28,8 @@ function App() {
         {showStatus.jobsPanel && <JobsPanel />}
         {showStatus.report && <Report />}
         {showStatus.database && <DatabaseManagement />}
+        {showStatus.settings && <SettingsPanel />}
+        {showStatus.help && <Help />}
       </VStack>
       <Footer />
     </ChakraProvider>

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import JobTable from "./JobTable"
 import { Agent, Industry, JOB_STATUS, Job, Response } from "../../types/models"
-import { GetJobsByDate, GetJobsByFilter, ListAllAgents, ListAllIndustries, ListJobs } from "../../../wailsjs/go/main/App";
+import { GetJobsByDate, GetJobsByFilter, ListAllAgents, ListAllIndustries, ListJobs } from "../../../wailsjs/go/repository/Repo";
 import { 
   Box, 
   HStack, 

@@ -2,137 +2,36 @@ package main
 
 import (
 	"context"
+	"encoding/csv"
 	"intjob/repository"
+	"io"
 	"log"
 	"os"
+	"strconv"
+	"time"
+
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // App struct
 type App struct {
-	ctx context.Context
+	ctx    context.Context
+	dbPath string
+	repo   *repository.Repo
 }
 
 // NewApp creates a new App application struct
-func NewApp() *App {
-	return &App{}
+func NewApp(dbPath string, repo *repository.Repo) *App {
+	return &App{
+		dbPath: dbPath,
+		repo:   repo,
+	}
 }
 
 // startup is called when the app starts. The context is saved
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-}
-
-func (a *App) GetAgentById(id uint) repository.Response {
-	return repository.GetAgentById(id)
-}
-
-func (a *App) SaveAgent(agent repository.Agent) repository.Response {
-	return repository.SaveAgent(agent)
-}
-
-func (a *App) ListAllAgents() repository.Response {
-	return repository.ListAllAgents()
-}
-
-func (a *App) DeleteAgent(agent repository.Agent) repository.Response {
-	return repository.DeleteAgent(agent)
-}
-
-func (a *App) GetIndustryById(id uint) repository.Response {
-	return repository.GetIndustryById(id)
-}
-
-func (a *App) SaveIndustry(industry repository.Industry) repository.Response {
-	return repository.SaveIndustry(industry)
-}
-
-func (a *App) ListAllIndustries() repository.Response {
-	return repository.ListAllIndustries()
-}
-
-func (a *App) DeleteIndustry(industry repository.Industry) repository.Response {
-	return repository.DeleteIndustry(industry)
-}
-
-func (a *App) GetRateById(id uint) repository.Response {
-	return repository.GetRateById(id)
-}
-
-func (a *App) GetRatesByAgentTypeAndCategory(agentId uint, typeId int, categoryId int) repository.Response {
-	return repository.GetRatesByAgentTypeAndCategory(agentId, typeId, categoryId)
-}
-
-func (a *App) SaveRate(rate repository.Rate) repository.Response {
-	return repository.SaveRate(rate)
-}
-
-func (a *App) ListAllRates() repository.Response {
-	return repository.ListAllRates()
-}
-
-func (a *App) DeleteRate(rate repository.Rate) repository.Response {
-	return repository.DeleteRate(rate)
-}
-
-func (a *App) GetHolidayById(id uint) repository.Response {
-	return repository.GetHolidayById(id)
-}
-
-func (a *App) GetHolidayByDate(date string) repository.Response {
-	return repository.GetHolidayByDate(date)
-}
-
-func (a *App) SaveHoliday(holiday repository.Holiday) repository.Response {
-	return repository.SaveHoliday(holiday)
-}
-
-func (a *App) ListHolidays(lastDate string, limit int) repository.Response {
-	return repository.ListHolidays(lastDate, limit)
-}
-
-func (a *App) DeleteHoliday(holiday repository.Holiday) repository.Response {
-	return repository.DeleteHoliday(holiday)
-}
-
-func (a *App) GetJobById(id uint) repository.Response {
-	return repository.GetJobById(id)
-}
-
-func (a *App) SaveJob(job repository.Job) repository.Response {
-	return repository.SaveJob(job)
-}
-
-func (a *App) ListJobs(lastDate string, status []int, limit int) repository.Response {
-	return repository.ListJobs(lastDate, status, limit)
-}
-
-func (a *App) GetJobsByDate(startDate, endDate string) repository.Response {
-	return repository.GetJobsByDate(startDate, endDate)
-}
-
-func (a *App) GetJobsByFilter(filterName, filterValue string, lastDate string, limit int) repository.Response {
-	return repository.GetJobsByFilter(filterName, filterValue, lastDate, limit)
-}
-
-func (a *App) DeleteJob(job repository.Job) repository.Response {
-	return repository.DeleteJob(job)
-}
-
-func (a *App) GetLocationById(id uint) repository.Response {
-	return repository.GetLocationById(id)
-}
-
-func (a *App) SaveLocation(location repository.Location) repository.Response {
-	return repository.SaveLocation(location)
-}
-
-func (a *App) ListAllLocations() repository.Response {
-	return repository.ListAllLocations()
-}
-
-func (a *App) DeleteLocation(location repository.Location) repository.Response {
-	return repository.DeleteLocation(location)
 }
 
 func (a *App) GetCurrentDir() string {
@@ -142,4 +41,140 @@ func (a *App) GetCurrentDir() string {
 		log.Println(err)
 	}
 	return path
+}
+
+func (a *App) BackupDatabase() string {
+	directory, err := runtime.OpenDirectoryDialog(a.ctx, runtime.OpenDialogOptions{
+		Title: "Select the destination directory",
+	})
+	if err != nil {
+		log.Println(err)
+		return err.Error()
+	}
+
+	if directory == "" {
+		return "Canceled. No directory selected."
+	}
+
+	fileName := "intjob-backup-" + time.Now().Format("2006-01-02") + ".db"
+	destinationPath := directory + "/" + fileName
+	sourcePath := a.dbPath
+
+	sourceFile, err := os.Open(sourcePath)
+	if err != nil {
+		log.Println("Failed to open source file", err)
+		return err.Error()
+	}
+	defer sourceFile.Close()
+
+	destinationFile, err := os.Create(destinationPath)
+	if err != nil {
+		log.Println("Failed to create destination file", err)
+		return err.Error()
+	}
+	defer destinationFile.Close()
+
+	_, err = io.Copy(destinationFile, sourceFile)
+	if err != nil {
+		log.Println("Failed to copy file", err)
+		return err.Error()
+	}
+
+	log.Println(directory)
+	return "Database has been backed up to " + destinationPath + " successfully."
+
+}
+
+func (a *App) ExportJob() string {
+	directory, err := runtime.OpenDirectoryDialog(a.ctx, runtime.OpenDialogOptions{
+		Title: "Select the destination directory",
+	})
+	if err != nil {
+		log.Println(err)
+		return err.Error()
+	}
+
+	if directory == "" {
+		return "Canceled. No directory selected."
+	}
+
+	response := a.repo.ListJobs("", []int{1, 2, 3}, 99999)
+	jobs, _ := response.Result.([]repository.Job)
+
+	fileName := "intjob-jobs-" + time.Now().Format("2006-01-02") + ".csv"
+	destinationPath := directory + "/" + fileName
+
+	file, err := os.Create(destinationPath)
+	if err != nil {
+		log.Println("Failed to create file:", err)
+		return err.Error()
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+
+	header := getCSVHeader()
+	if err := writer.Write(header); err != nil {
+		log.Println("Failed to write header:", err)
+		return err.Error()
+	}
+
+	for _, job := range jobs {
+		row := getCSVRow(job)
+		if err := writer.Write(row); err != nil {
+			log.Println("Failed to write row:", err)
+			return err.Error()
+		}
+	}
+
+	return "Jobs have been exported to " + destinationPath + " successfully."
+}
+
+func getCSVHeader() []string {
+	header := []string{}
+	header = append(header, "ID")
+	header = append(header, "AgentJobNumber")
+	header = append(header, "AgentName")
+	header = append(header, "Industry")
+	header = append(header, "StartAt")
+	header = append(header, "Duration")
+	header = append(header, "Income")
+	header = append(header, "Status")
+	header = append(header, "CancelAt")
+	header = append(header, "Rate")
+	header = append(header, "Comments")
+	header = append(header, "Address")
+	header = append(header, "Traffic")
+	return header
+}
+
+func getCSVRow(job repository.Job) []string {
+	startAt, err := time.Parse("2006-01-02T15:04:05Z", job.StartAt)
+	if err != nil {
+		log.Println("Failed to parse date-time:", err)
+	}
+	startAtString := startAt.Local().Format("2006-01-02 15:04:05")
+
+	cancelAt, err := time.Parse("2006-01-02T15:04:05Z", job.CancelAt)
+	if err != nil {
+		log.Println("Failed to parse date-time:", err)
+	}
+	cancelAtString := cancelAt.Local().Format("2006-01-02 15:04:05")
+
+	row := []string{}
+	row = append(row, strconv.FormatUint(uint64(job.ID), 10))
+	row = append(row, job.AgentJobNumber)
+	row = append(row, job.Agent.Name)
+	row = append(row, job.Industry.Name)
+	row = append(row, startAtString)
+	row = append(row, strconv.FormatInt(int64(job.Duration), 10))
+	row = append(row, strconv.FormatFloat(job.Income, 'f', 2, 64))
+	row = append(row, strconv.FormatInt(int64(job.Status), 10))
+	row = append(row, cancelAtString)
+	row = append(row, job.Rate.Name)
+	row = append(row, job.Comments)
+	row = append(row, job.Address)
+	row = append(row, job.Traffic)
+
+	return row
 }

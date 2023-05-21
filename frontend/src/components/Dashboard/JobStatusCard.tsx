@@ -83,41 +83,43 @@ function JobStatusCard({ jobs }: { jobs: Job[] }) {
   return (
     <>
       <Card w='full'>
-        <VStack p={4} align='flex-start'>
-          <HStack w='full'>
+        <VStack align='flex-start'>
+          <HStack px={4} pt={4} w='full'>
             <Text>📌 Job Status</Text>
             <Spacer />
             <Text>{new Date().toLocaleDateString('sv-SE')}</Text>
           </HStack>
           <Divider />
-          {upComingJobs.length > 0 ? (
-            <>
-              <Text fontSize='sm'>{`Upcoming Jobs: ${upComingJobs.length}`}</Text>
-              {upComingJobs.map((job, index) => (
-                <Tag  
-                  w='full' px={4}
-                  key={`${job.ID}-${index}`}
-                  _hover={{cursor: 'pointer'}}
-                  onClick={() => setSelectedJob(job)}
-                >
-                  <HStack fontSize='sm' w='full'>
-                    <Text>{new Date(job.StartAt).toLocaleString('sv-SE')}</Text>
-                    <Spacer />
-                    <Text>{job.Industry?.Name}</Text>
-                  </HStack>
-                </Tag>
-              ))}
-            </>
-          ) : (
-            <Text fontSize='sm'>No Upcoming Jobs</Text>
-          )}
-          <HStack w='full'>
-            <Text fontSize='sm'>Booked: {booked}</Text>
-            <Spacer />
-            <Text fontSize='sm'>Completed: {completed}</Text>
-            <Spacer />
-            <Text fontSize='sm'>Canceled: {canceled}</Text>
-          </HStack>
+          <VStack w='full' px={4} pb={4} align='flex-start' spacing={3}>
+            {upComingJobs.length > 0 ? (
+              <>
+                <Text fontSize='sm'>{`Upcoming Jobs: ${upComingJobs.length}`}</Text>
+                {upComingJobs.map((job, index) => (
+                  <Tag  
+                    w='full' px={4}
+                    key={`${job.ID}-${index}`}
+                    _hover={{cursor: 'pointer'}}
+                    onClick={() => setSelectedJob(job)}
+                  >
+                    <HStack fontSize='sm' w='full'>
+                      <Text>{new Date(job.StartAt).toLocaleString('sv-SE')}</Text>
+                      <Spacer />
+                      <Text>{job.Industry?.Name}</Text>
+                    </HStack>
+                  </Tag>
+                ))}
+              </>
+            ) : (
+              <Text fontSize='sm'>No Upcoming Jobs</Text>
+            )}
+            <HStack w='full'>
+              <Text fontSize='sm'>Booked: {booked}</Text>
+              <Spacer />
+              <Text fontSize='sm'>Completed: {completed}</Text>
+              <Spacer />
+              <Text fontSize='sm'>Canceled: {canceled}</Text>
+            </HStack>
+          </VStack>
         </VStack>
         <Button
           onClick={onOpenJobFrom}

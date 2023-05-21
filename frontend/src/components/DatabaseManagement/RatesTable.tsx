@@ -18,7 +18,7 @@ import {
 } from "@chakra-ui/react"
 import { useEffect, useRef, useState } from "react";
 import { Agent, JOB_CATEGORY, JOB_TYPE, Rate, Response } from "../../types/models";
-import { DeleteRate, ListAllAgents, ListAllRates, SaveRate } from "../../../wailsjs/go/main/App";
+import { DeleteRate, ListAllAgents, ListAllRates, SaveRate } from "../../../wailsjs/go/repository/Repo";
 import GenericForm, { Field } from "../Forms/GenericForm";
 import { getKeyByValue } from "../../types/utils";
 

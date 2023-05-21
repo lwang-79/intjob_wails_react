@@ -93,3 +93,17 @@ export const JOB_TYPE = {
 	SUN: 4,
 	PH: 5
 }
+
+export type LocationService = {
+	Region: string
+	IndexName: string
+	CalculatorName: string
+	IdentityPoolID: string
+	FilterCountries: string[]
+	HomeGeometry: number[]
+}
+
+export type Settings = {
+	DBPath: string
+	LocationService: LocationService
+}

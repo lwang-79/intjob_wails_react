@@ -1,31 +1,35 @@
 import { CognitoIdentityClient } from "@aws-sdk/client-cognito-identity";
 import { CalculateRouteCommand, GetPlaceCommand, LocationClient, SearchPlaceIndexForSuggestionsCommand } from "@aws-sdk/client-location"; 
 import { fromCognitoIdentityPool } from "@aws-sdk/credential-provider-cognito-identity";
+import { GetLocationService } from "../../wailsjs/go/settings/Settings"
+import { LocationService } from "./models";
 
-const REGION = 'ap-southeast-2';
-const INDEX_NAME = 'HereIndex'; //EsriIndex
-const CALCULATOR_NAME = 'HereCalculator';
-const IDENTITY_POOL_ID = 'ap-southeast-2:c65f490d-31b7-46fe-94d8-fbdb071fe994';
-const HOME_POSITION = [145.24, -37.87];
-const FILTER_COUNTRY = ['AUS'];
+// const REGION = 'ap-southeast-2';
+// const INDEX_NAME = 'HereIndex'; //EsriIndex
+// const CALCULATOR_NAME = 'HereCalculator';
+// const IDENTITY_POOL_ID = 'ap-southeast-2:c65f490d-31b7-46fe-94d8-fbdb071fe994';
+// const HOME_POSITION = [145.24, -37.87];
+// const FILTER_COUNTRY = ['AUS'];
+
+const LOCATION_SERVICE: LocationService = await GetLocationService();
 
 export const searchPlaceIndex = async (text: string) => {
   if (!text) return [];
 
   try {
     const client = new LocationClient({
-      region: REGION,
+      region: LOCATION_SERVICE.Region,
       credentials: fromCognitoIdentityPool({
-        client: new CognitoIdentityClient({ region: REGION }),
-        identityPoolId: IDENTITY_POOL_ID 
+        client: new CognitoIdentityClient({ region: LOCATION_SERVICE.Region }),
+        identityPoolId: LOCATION_SERVICE.IdentityPoolID 
       } as any),
     });
 
     const input = { // SearchPlaceIndexForSuggestionsRequest
-      IndexName: INDEX_NAME, // required
+      IndexName: LOCATION_SERVICE.IndexName, // required
       Text: text, // required
-      BiasPosition: HOME_POSITION,
-      FilterCountries: FILTER_COUNTRY,
+      BiasPosition: LOCATION_SERVICE.HomeGeometry,
+      FilterCountries: LOCATION_SERVICE.FilterCountries,
       MaxResults: 10,
       Language: 'en',
     };
@@ -43,15 +47,15 @@ export const getPlace = async (placeId: string) => {
 
   try {
     const client = new LocationClient({
-      region: REGION,
+      region: LOCATION_SERVICE.Region,
       credentials: fromCognitoIdentityPool({
-        client: new CognitoIdentityClient({ region: REGION }),
-        identityPoolId: IDENTITY_POOL_ID 
+        client: new CognitoIdentityClient({ region: LOCATION_SERVICE.Region }),
+        identityPoolId: LOCATION_SERVICE.IdentityPoolID 
       } as any),
     });
 
     const input = { // SearchPlaceIndexForSuggestionsRequest
-      IndexName: INDEX_NAME, // required
+      IndexName: LOCATION_SERVICE.IndexName, // required
       PlaceId: placeId,
       Language: 'en',
     };
@@ -74,15 +78,15 @@ export const calculateDistance = async (departure: string, destination: string) 
     if (!departurePosition || !destinationPosition) return;
   
     const client = new LocationClient({
-      region: REGION,
+      region: LOCATION_SERVICE.Region,
       credentials: fromCognitoIdentityPool({
-        client: new CognitoIdentityClient({ region: REGION }),
-        identityPoolId: IDENTITY_POOL_ID 
+        client: new CognitoIdentityClient({ region: LOCATION_SERVICE.Region }),
+        identityPoolId: LOCATION_SERVICE.IdentityPoolID 
       } as any),
     });
 
     const input = { // SearchPlaceIndexForSuggestionsRequest
-      CalculatorName: CALCULATOR_NAME, // required
+      CalculatorName: LOCATION_SERVICE.CalculatorName, // required
       DeparturePosition: departurePosition,
       DestinationPosition: destinationPosition,
       TravelMode: 'Car',

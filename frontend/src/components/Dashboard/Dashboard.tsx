@@ -3,7 +3,7 @@ import Highcharts from "highcharts/highstock";
 import { useEffect, useMemo, useState } from 'react'
 import JobByDateChart from './JobByDateChart';
 import { JOB_STATUS, Job, Response } from '../../types/models';
-import { ListJobs } from '../../../wailsjs/go/main/App';
+import { ListJobs } from '../../../wailsjs/go/repository/Repo';
 import AgentAndIndustryChart from './AgentAndIndustryChart';
 import IncomeLineChart from './IncomeLineChart';
 import JobStatusCard from './JobStatusCard';

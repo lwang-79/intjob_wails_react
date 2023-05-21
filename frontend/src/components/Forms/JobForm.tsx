@@ -19,7 +19,7 @@ import {
 } from "@chakra-ui/react";
 import { Agent, Industry, JOB_CATEGORY, JOB_STATUS, Job, Location, Rate, Response } from "../../types/models"
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { GetRatesByAgentTypeAndCategory, ListAllAgents, ListAllIndustries, ListAllLocations, SaveJob, SaveLocation } from "../../../wailsjs/go/main/App";
+import { GetRatesByAgentTypeAndCategory, ListAllAgents, ListAllIndustries, ListAllLocations, SaveJob, SaveLocation } from "../../../wailsjs/go/repository/Repo";
 import { calculateIncome, getAndUpdateJobTraffic, getJobType } from "../../types/job";
 import { getKeyByValue, jobTypeIcon } from "../../types/utils";
 import { getPlace, searchPlaceIndex } from "../../types/location";
@@ -72,6 +72,7 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
   const [ autoCompleteWidth, setAutoCompleteWidth] = useState(0);
   const fontColor = useColorModeValue('gray.900', 'gray.50');
   const [ isInProgress, setIsInProgress ] = useState<boolean>(false);
+  const optionColor = useColorModeValue('gray.50', 'gray.800');
 
 
   const [ formState, setFormState ] = useState<Job>(job ? {
@@ -99,6 +100,11 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
   },[]);
 
   useLayoutEffect(() => {
+    if (isFirstRender) {
+      setIsFirstRender(false);
+      return;
+    }
+
     const inputElement = autoCompleteRef.current;
     if (!inputElement) {
       return;
@@ -570,7 +576,7 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
               left={`${boxPosition.left}px`}
               w={autoCompleteWidth}
               p={2}
-              bgColor={useColorModeValue('gray.50', 'gray.800')}
+              bgColor={optionColor}
             >
               <VStack 
                 spacing={1}

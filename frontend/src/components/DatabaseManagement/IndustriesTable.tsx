@@ -18,7 +18,7 @@ import {
 } from "@chakra-ui/react"
 import { useEffect, useState } from "react";
 import { Industry, Response } from "../../types/models";
-import { DeleteIndustry, ListAllIndustries, SaveIndustry } from "../../../wailsjs/go/main/App";
+import { DeleteIndustry, ListAllIndustries, SaveIndustry } from "../../../wailsjs/go/repository/Repo";
 import GenericForm from "../Forms/GenericForm";
 
 function IndustriesTable() {

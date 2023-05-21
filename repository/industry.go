@@ -5,44 +5,24 @@ type Industry struct {
 	Name string
 }
 
-func GetIndustryById(id uint) Response {
-	db := openDatabase()
-
+func (r *Repo) GetIndustryById(id uint) Response {
 	industry := Industry{ID: id}
-	err := db.First(&industry, id).Error
-
-	closeDatabase(db)
-
+	err := r.db.First(&industry, id).Error
 	return Response{Result: industry, Status: successOrError(err)}
 }
 
-func ListAllIndustries() Response {
-	db := openDatabase()
-
+func (r *Repo) ListAllIndustries() Response {
 	var industries []Industry
-	err := db.Find(&industries).Error
-
-	closeDatabase(db)
-
+	err := r.db.Find(&industries).Error
 	return Response{Result: industries, Status: successOrError(err)}
 }
 
-func SaveIndustry(industry Industry) Response {
-	db := openDatabase()
-
-	err := db.Save(&industry).Error
-
-	closeDatabase(db)
-
+func (r *Repo) SaveIndustry(industry Industry) Response {
+	err := r.db.Save(&industry).Error
 	return Response{Result: industry, Status: successOrError(err)}
 }
 
-func DeleteIndustry(industry Industry) Response {
-	db := openDatabase()
-
-	err := db.Delete(&industry).Error
-
-	closeDatabase(db)
-
+func (r *Repo) DeleteIndustry(industry Industry) Response {
+	err := r.db.Delete(&industry).Error
 	return Response{Result: "", Status: successOrError(err)}
 }

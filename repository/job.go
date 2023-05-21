@@ -22,20 +22,13 @@ type Job struct {
 	Traffic        string
 }
 
-func GetJobById(id uint) Response {
-	db := openDatabase()
-
+func (r *Repo) GetJobById(id uint) Response {
 	job := Job{ID: id}
-	err := db.Preload("Agent").Preload("Industry").Preload("Rate").First(&job, id).Error
-
-	closeDatabase(db)
-
+	err := r.db.Preload("Agent").Preload("Industry").Preload("Rate").First(&job, id).Error
 	return Response{Result: job, Status: successOrError(err)}
 }
 
-func ListJobs(lastDate string, status []int, limit int) Response {
-	db := openDatabase()
-
+func (r *Repo) ListJobs(lastDate string, status []int, limit int) Response {
 	if lastDate == "" {
 		lastDate = "9999-12-31 23:59:59"
 	}
@@ -45,7 +38,7 @@ func ListJobs(lastDate string, status []int, limit int) Response {
 	}
 
 	var jobs []Job
-	err := db.Preload("Agent").
+	err := r.db.Preload("Agent").
 		Preload("Industry").
 		Preload("Rate").
 		Limit(limit).
@@ -53,14 +46,10 @@ func ListJobs(lastDate string, status []int, limit int) Response {
 		Where("start_at < ? AND status IN ?", lastDate, status).
 		Find(&jobs).Error
 
-	closeDatabase(db)
-
 	return Response{Result: jobs, Status: successOrError(err)}
 }
 
-func GetJobsByDate(startDate, endDate string) Response {
-	db := openDatabase()
-
+func (r *Repo) GetJobsByDate(startDate, endDate string) Response {
 	if endDate == "" {
 		date, err := time.Parse("2006-01-02", startDate)
 
@@ -71,21 +60,17 @@ func GetJobsByDate(startDate, endDate string) Response {
 	}
 
 	var jobs []Job
-	err := db.Preload("Agent").
+	err := r.db.Preload("Agent").
 		Preload("Industry").
 		Preload("Rate").
 		Order("start_at desc").
 		Where("start_at >= ? AND start_at < ?", startDate, endDate).
 		Find(&jobs).Error
 
-	closeDatabase(db)
-
 	return Response{Result: jobs, Status: successOrError(err)}
 }
 
-func GetJobsByFilter(filterName, filterValue string, lastDate string, limit int) Response {
-	db := openDatabase()
-
+func (r *Repo) GetJobsByFilter(filterName, filterValue string, lastDate string, limit int) Response {
 	if lastDate == "" {
 		lastDate = "9999-12-31 23:59:59"
 	}
@@ -96,7 +81,7 @@ func GetJobsByFilter(filterName, filterValue string, lastDate string, limit int)
 	if filterName == "Agent" {
 		var agent Agent
 
-		err := db.Where("name = ?", filterValue).First(&agent).Error
+		err := r.db.Where("name = ?", filterValue).First(&agent).Error
 		if err != nil {
 			return Response{Result: "", Status: successOrError(err)}
 		}
@@ -107,7 +92,7 @@ func GetJobsByFilter(filterName, filterValue string, lastDate string, limit int)
 	if filterName == "Industry" {
 		var industry Industry
 
-		err := db.Where("name = ?", filterValue).First(&industry).Error
+		err := r.db.Where("name = ?", filterValue).First(&industry).Error
 		if err != nil {
 			return Response{Result: "", Status: successOrError(err)}
 		}
@@ -126,11 +111,9 @@ func GetJobsByFilter(filterName, filterValue string, lastDate string, limit int)
 		}
 	}
 
-	println(name, value)
 	var condition string = "start_at < ? AND " + name + " = ?"
 	var jobs []Job
-	println(condition)
-	err := db.Preload("Agent").
+	err := r.db.Preload("Agent").
 		Preload("Industry").
 		Preload("Rate").
 		Order("start_at desc").
@@ -138,33 +121,22 @@ func GetJobsByFilter(filterName, filterValue string, lastDate string, limit int)
 		Where(condition, lastDate, value).
 		Find(&jobs).Error
 
-	closeDatabase(db)
-
 	return Response{Result: jobs, Status: successOrError(err)}
 }
 
-func SaveJob(job Job) Response {
-	db := openDatabase()
-
-	err := db.Save(&job).Error
+func (r *Repo) SaveJob(job Job) Response {
+	err := r.db.Save(&job).Error
 
 	if err != nil {
 		return Response{Result: "", Status: successOrError(err)}
 	}
 	newJob := Job{ID: job.ID}
-	err = db.Preload("Agent").Preload("Industry").Preload("Rate").First(&newJob, job.ID).Error
-
-	closeDatabase(db)
+	err = r.db.Preload("Agent").Preload("Industry").Preload("Rate").First(&newJob, job.ID).Error
 
 	return Response{Result: newJob, Status: successOrError(err)}
 }
 
-func DeleteJob(job Job) Response {
-	db := openDatabase()
-
-	err := db.Delete(&job).Error
-
-	closeDatabase(db)
-
+func (r *Repo) DeleteJob(job Job) Response {
+	err := r.db.Delete(&job).Error
 	return Response{Result: "", Status: successOrError(err)}
 }

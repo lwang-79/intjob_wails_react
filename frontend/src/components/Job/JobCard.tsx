@@ -6,7 +6,7 @@ import { getKeyByValue, jobCategoryIcon, jobStatusIcon, jobTypeIcon } from "../.
 import { useRef, useState } from "react"
 import JobForm from "../Forms/JobForm"
 import DeleteAlert from "../Common/CommonAlert"
-import { DeleteJob } from "../../../wailsjs/go/main/App"
+import { DeleteJob } from "../../../wailsjs/go/repository/Repo"
 import { CalculateRouteSummary } from "@aws-sdk/client-location"
 import { getAndUpdateJobTraffic } from "../../types/job"
 import { MdDirectionsCar, MdOutlineLocationOn } from "react-icons/md"

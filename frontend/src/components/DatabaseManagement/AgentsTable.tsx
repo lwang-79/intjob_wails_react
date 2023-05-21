@@ -18,7 +18,7 @@ import {
 } from "@chakra-ui/react"
 import { useEffect, useState } from "react";
 import { Agent, Response } from "../../types/models";
-import { DeleteAgent, ListAllAgents, SaveAgent } from "../../../wailsjs/go/main/App";
+import { DeleteAgent, ListAllAgents, SaveAgent } from "../../../wailsjs/go/repository/Repo";
 import GenericForm from "../Forms/GenericForm";
 
 function AgentsTable() {

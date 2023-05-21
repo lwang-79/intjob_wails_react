@@ -18,7 +18,7 @@ import {
 } from "@chakra-ui/react"
 import { useEffect, useState } from "react";
 import { Holiday, Response } from "../../types/models";
-import { DeleteHoliday, ListHolidays, SaveHoliday } from "../../../wailsjs/go/main/App";
+import { DeleteHoliday, ListHolidays, SaveHoliday } from "../../../wailsjs/go/repository/Repo";
 import GenericForm from "../Forms/GenericForm";
 import HolidayUpdate from "./HolidayUpdate";
 
