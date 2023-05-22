@@ -146,10 +146,34 @@ function JobsPanel() {
 
   const searchJobs = async () => {
     try {
-      const dates = searchDate.trim().split(',');
-      const startDate = new Date(dates[0]).toISOString().slice(0,10);
-      const endDate = dates[1] ? new Date(dates[1]).toISOString().slice(0,10) : '';
-      const response: Response = await GetJobsByDate(startDate, endDate);
+      const dates = searchDate.replace(/\s/g, '').split(',');
+      const date = new Date(dates[0]);
+      const startDate = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, 0);
+      let startDateString = startDate.toISOString();
+      if (startDateString < '2023-05-15') {
+        startDateString = startDateString.replace('T', ' ').replace('.000Z', '');
+      } else {
+        startDateString = startDateString.replace('.000Z', 'Z');
+      }
+
+      let endDateString = '';
+      if (dates[1]) {
+        const date = new Date(dates[1]);
+        const endDate = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, 0);
+        endDateString = endDate.toISOString();
+      } else {
+        let endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 1);
+        endDateString = endDate.toISOString();
+      }
+
+      if (endDateString < '2023-05-15') {
+        endDateString = endDateString.replace('T', ' ').replace('.000Z', '');
+      } else {
+        endDateString = endDateString.replace('.000Z', 'Z');
+      }
+
+      const response: Response = await GetJobsByDate(startDateString, endDateString);
   
       if (response.Status !== 'success') {
         console.error(response.Status);

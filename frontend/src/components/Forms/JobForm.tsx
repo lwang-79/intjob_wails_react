@@ -23,7 +23,8 @@ import { GetRatesByAgentTypeAndCategory, ListAllAgents, ListAllIndustries, ListA
 import { calculateIncome, getAndUpdateJobTraffic, getJobType } from "../../types/job";
 import { getKeyByValue, jobTypeIcon } from "../../types/utils";
 import { getPlace, searchPlaceIndex } from "../../types/location";
-import { MdAdd } from "react-icons/md";
+import { MdAdd, MdContentPaste } from "react-icons/md";
+import { ClipboardGetText } from "../../../wailsjs/runtime/runtime";
 
 export interface SearchedPlace {
   PlaceId: string
@@ -49,10 +50,6 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
   const [ selectedRate, setSelectedRate ] = useState<Rate>();
   const [ jobType, setJobType ] = useState(1);
   const [ income, setIncome ] = useState(!isNew ? job.Income : 0);
-  const agentJobNumberRef = useRef<string>(
-    !isNew && job.AgentJobNumber ? job.AgentJobNumber : ''
-  );
-  const commentsRef = useRef<string>(!isNew && job.Comments ? job.Comments : '');
   const [ placeOptions, setPlaceOptions ] = useState<Location[]>([]);
   const [ selectedLocation, setSelectedLocation ] = useState<Location>(job ? {
     Address: job.Address?? '',
@@ -383,6 +380,14 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
     }
   }
 
+  const pasteClickedHandler = async () => {
+    const value = await ClipboardGetText();
+    setFormState({
+      ...formState,
+      AgentJobNumber: value
+    })
+  }
+
   const submit = async (button: string) => {
     setIsInProgress(true);
 
@@ -399,8 +404,6 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
       Rate: undefined,
       Industry: undefined,
       Agent: undefined,
-      AgentJobNumber: agentJobNumberRef.current,
-      Comments: commentsRef.current,
       Status : button === 'Complete' ? JOB_STATUS.Completed : 
         button === 'Book' ? JOB_STATUS.Booked : formState.Status,
       Address: selectedLocation.Address?? undefined,
@@ -523,13 +526,22 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
           <HStack w='full' spacing={4}>
             <Spacer />
             <Text>Job No.:</Text>
+            <HStack w='70%' spacing={0}>
               <Input 
-                w='70%'
-                defaultValue={formState.AgentJobNumber}
-                onChange={(e)=>{agentJobNumberRef.current = e.target.value as string}}
+                value={formState.AgentJobNumber}
+                onChange={setInput('AgentJobNumber')}
                 placeholder='Agent job number'
                 rounded={0}
               />
+              <IconButton
+                aria-label='Paste'
+                size='sm'
+                rounded='full'
+                variant='ghost'
+                icon={<Icon as={MdContentPaste} boxSize={6} />}
+                onClick={pasteClickedHandler}
+              />
+            </HStack>
           </HStack>
 
           <HStack w='full' spacing={4}>
@@ -654,9 +666,9 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
             <Text>Comments:</Text>
               <Input 
                 w='70%'
-                defaultValue={formState.Comments}
+                value={formState.Comments}
                 placeholder='Comments'
-                onChange={(e)=>{commentsRef.current = e.target.value as string}}
+                onChange={setInput('Comments')}
                 rounded={0}
               />
           </HStack>
@@ -742,8 +754,6 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
           </Button>
         </HStack>
       </VStack>
-
-
     </>
   )
 }

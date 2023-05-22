@@ -1,7 +1,5 @@
 package repository
 
-import "time"
-
 type Job struct {
 	ID             uint
 	AgentJobNumber string
@@ -50,15 +48,6 @@ func (r *Repo) ListJobs(lastDate string, status []int, limit int) Response {
 }
 
 func (r *Repo) GetJobsByDate(startDate, endDate string) Response {
-	if endDate == "" {
-		date, err := time.Parse("2006-01-02", startDate)
-
-		if err == nil {
-			nextDay := date.AddDate(0, 0, 1)
-			endDate = nextDay.Format("2006-01-02")
-		}
-	}
-
 	var jobs []Job
 	err := r.db.Preload("Agent").
 		Preload("Industry").
