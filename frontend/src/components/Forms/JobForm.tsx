@@ -82,7 +82,8 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
     ID: 0,
     AgentID: 3,
     AgentJobNumber: '',
-    StartAt: new Date(new Date(new Date().setHours(new Date().getHours() + 1)).setMinutes(0)).toLocaleString('sv-SE').slice(0,16),
+    // StartAt: new Date(new Date(new Date().setHours(new Date().getHours() + 1)).setMinutes(0)).toLocaleString('sv-SE').slice(0,16),
+    StartAt: new Date().toLocaleString('sv-SE').slice(0,16),
     Duration: 60,
     Income:  0,
     IndustryID: 9,
@@ -130,17 +131,12 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
       return;
     }
 
-    getAndUpdateRates(agents).then(rates => {
-      if (rates[0].ID) {
-        setFormState({
-          ...formState,
-          RateID: rates[0].ID
-        })
-  
-        setSelectedRate(rates[0]);
-      }
+    getAndUpdateRates(agents, industries)
+    .then(rates => {
+      setDefaultRate(rates);
     });
-  },[formState.AgentID, formState.StartAt, selectedCategory]);
+    
+  },[formState.AgentID, formState.StartAt, selectedCategory, formState.IndustryID, industries]);
 
   useEffect(() => {
     if (isFirstRender) {
@@ -193,9 +189,10 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
       return;
     }
 
-    setIndustries(response.Result as Industry[]);
+    const industries = response.Result as Industry[];
+    setIndustries(industries);
 
-    const rates = await getAndUpdateRates(agents);
+    const rates = await getAndUpdateRates(agents, industries);
 
     if (!isNew) {
       const rate = rates.find(rate => rate.ID === formState.RateID);
@@ -203,7 +200,7 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
         setSelectedRate(rate);
         setIncome(calculateIncome(formState, rate));
       }
-    } else if (rates[0].ID) {
+    } else if(rates[0].ID) {
       setFormState({
         ...formState,
         RateID: rates[0].ID
@@ -223,7 +220,7 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
     setFavoriteLocations(locations);
   }
 
-  const getAndUpdateRates = async (agents: Agent[]): Promise<Rate[]> => {
+  const getAndUpdateRates = async (agents: Agent[], industries: Industry[]): Promise<Rate[]> => {
     const type = await getJobType(formState, agents);
     setJobType(type);
 
@@ -241,6 +238,58 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
     const rates = response.Result as Rate[];
     setRates(rates);
     return rates;
+  }
+
+  const setDefaultRate = (rates: Rate[]) => {
+    if (!industries || !isNew) {
+      setFormState({
+        ...formState,
+        RateID: rates[0].ID!
+      });
+
+      setSelectedRate(rates[0]);
+      return rates;
+    }
+
+    let industryName = industries.find((industry) => industry.ID === formState.IndustryID)!.Name;
+    
+    if (['Government', 'Health', 'Police'].includes(industryName)) industryName = 'Gov';
+
+    let isRateSelected = false;
+    for (const rate of rates) {
+      if (rate.Name.toLowerCase().includes(industryName.toLowerCase())) {
+        setFormState({
+          ...formState,
+          RateID: rate.ID!
+        });
+
+        setSelectedRate(rate);
+        isRateSelected = true;
+        break;
+      } 
+    }
+
+    if (!isRateSelected) {
+      const rate = rates.find(rate => 
+        !rate.Name.toLowerCase().includes('gov') &&
+        !rate.Name.toLowerCase().includes('vicroads')
+      );
+      if (rate) {
+        setFormState({
+          ...formState,
+          RateID: rate.ID!
+        });
+
+        setSelectedRate(rate);
+      } else {
+        setFormState({
+          ...formState,
+          RateID: rates[0].ID!
+        });
+
+        setSelectedRate(rates[0]);
+      }
+    }
   }
 
   const setInput = (key: string) => (event: any) => {

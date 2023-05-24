@@ -9,5 +9,10 @@
   "author": {
     "name": "lwang",
     "email": "lwang79@gmail.com"
+  },
+  "info": {
+    "companyName": "Jinpearl",
+    "productName": "IntJob",
+    "productVersion": "1.0.1"
   }
 }
