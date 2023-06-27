@@ -21,7 +21,7 @@ import { Agent, Industry, JOB_CATEGORY, JOB_STATUS, Job, Location, Rate, Respons
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { GetRatesByAgentTypeAndCategory, ListAllAgents, ListAllIndustries, ListAllLocations, SaveJob, SaveLocation } from "../../../wailsjs/go/repository/Repo";
 import { calculateIncome, getAndUpdateJobTraffic, getJobType } from "../../types/job";
-import { getKeyByValue, jobTypeIcon } from "../../types/utils";
+import { getFirstNumberFromString, getKeyByValue, jobTypeIcon } from "../../types/utils";
 import { getPlace, searchPlaceIndex } from "../../types/location";
 import { MdAdd, MdContentPaste } from "react-icons/md";
 import { ClipboardGetText } from "../../../wailsjs/runtime/runtime";
@@ -147,6 +147,10 @@ function JobForm({ job, onFinishCallBack, closeCallBack }: JobFormProps) {
     if (rate) {
       setSelectedRate(rate);
       setIncome(calculateIncome(formState, rate));
+      setFormState({
+        ...formState,
+        Duration: rate.MinTime
+      });
     }
   },[formState.RateID]);
 

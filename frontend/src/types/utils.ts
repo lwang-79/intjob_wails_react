@@ -104,9 +104,19 @@ function changeArrayByItem<T extends {ID?: number}> (
 	return items;
 }
 
+function getFirstNumberFromString(str: string) {
+  const regex = /\d+/; // Matches one or more digits
+  const match = str.match(regex); // Find the first match in the string
+  if (match) {
+    return parseInt(match[0]); // Parse the matched string as an integer
+  }
+  return null; // Return null if no match is found
+}
+
 export {
 	changeArrayByItem,
   sesSendEmail,
+	getFirstNumberFromString,
 	getKeyByValue,
 	getWeekNumber,
 	jobCategoryIcon,
